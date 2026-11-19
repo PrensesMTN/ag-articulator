@@ -14,14 +14,14 @@ window.AgHead3D = (() => {
   controls.dampingFactor = 0.06;
   controls.target.set(0.0, -0.18, 0.05);
 
-  // Subtle X-Ray Rim Glow Shell Material (Purple & Solar Yellow Theme)
+  // Ultra-Clean Holographic Edge-Only Fresnel Shell (No Fleshy/Muddy Bulk)
   const xrayShellMat = new THREE.ShaderMaterial({
     transparent: true,
     depthWrite: false,
     side: THREE.FrontSide,
     uniforms: {
       cRim: { value: new THREE.Color(0xc084fc) },
-      cCore: { value: new THREE.Color(0x1e1035) }
+      cHighlight: { value: new THREE.Color(0xfef08a) }
     },
     vertexShader: `
       varying vec3 vNormal;
@@ -35,24 +35,25 @@ window.AgHead3D = (() => {
     `,
     fragmentShader: `
       uniform vec3 cRim;
-      uniform vec3 cCore;
+      uniform vec3 cHighlight;
       varying vec3 vNormal;
       varying vec3 vViewDir;
       void main() {
-        float fresnel = pow(1.0 - abs(dot(vNormal, vViewDir)), 2.6);
-        vec3 col = mix(cCore, cRim, fresnel);
-        gl_FragColor = vec4(col, fresnel * 0.34);
+        float ndotv = abs(dot(vNormal, vViewDir));
+        float rim = pow(1.0 - ndotv, 3.6);
+        vec3 col = mix(cRim, cHighlight, pow(rim, 2.0) * 0.35);
+        gl_FragColor = vec4(col, rim * 0.24);
       }
     `
   });
 
   // Clean Anatomical Wireframe Line Materials
-  const outerGridMat = new THREE.LineBasicMaterial({ color: 0xa855f7, transparent: true, opacity: 0.20 });
-  const profileLineMat = new THREE.LineBasicMaterial({ color: 0xe9d5ff, transparent: true, opacity: 0.68 });
+  const outerGridMat = new THREE.LineBasicMaterial({ color: 0xa855f7, transparent: true, opacity: 0.18 });
+  const profileLineMat = new THREE.LineBasicMaterial({ color: 0xe9d5ff, transparent: true, opacity: 0.65 });
   const brainLineMat = new THREE.LineBasicMaterial({ color: 0xc084fc, transparent: true, opacity: 0.44 });
   const cerebellumMat = new THREE.LineBasicMaterial({ color: 0x9333ea, transparent: true, opacity: 0.42 });
   const spineLineMat = new THREE.LineBasicMaterial({ color: 0xd8b4fe, transparent: true, opacity: 0.48 });
-  const skullBoneMat = new THREE.LineBasicMaterial({ color: 0xc084fc, transparent: true, opacity: 0.45 });
+  const skullBoneMat = new THREE.LineBasicMaterial({ color: 0xc084fc, transparent: true, opacity: 0.36 });
   const teethLineMat = new THREE.LineBasicMaterial({ color: 0xfef08a, transparent: true, opacity: 0.58 });
   const jawLineMat = new THREE.LineBasicMaterial({ color: 0xfacc15, transparent: true, opacity: 0.94 });
   const palateLineMat = new THREE.LineBasicMaterial({ color: 0xfde047, transparent: true, opacity: 0.65 });
@@ -67,91 +68,130 @@ window.AgHead3D = (() => {
   scene.add(root);
 
   // =========================================================================
-  // 1. TRUE HUMAN PROFILE LOFT (Crown -> Forehead -> Nose -> Lips -> Chin -> Neck -> Shoulders)
+  // 1. SEAMLESS C2-CONTINUOUS HUMAN HEAD & NECK SURFACE (Soft Cheeks, No Protrusions)
   // =========================================================================
-  // Anatomical sagittal profile slices: [y, zFront, zBack, halfWidthX, zCenterOffset]
-  const PROFILE_SLICES = [
-    [ 1.18,  0.00,  0.00, 0.02, -0.04], // 0: Crown vertex
-    [ 1.13,  0.42, -0.52, 0.48, -0.05], // 1: Upper parietal dome
-    [ 1.00,  0.68, -0.82, 0.68, -0.07], // 2: Upper forehead / occiput
-    [ 0.82,  0.80, -0.96, 0.76, -0.08], // 3: Mid forehead
-    [ 0.60,  0.85, -1.02, 0.78, -0.08], // 4: Lower forehead
-    [ 0.42,  0.89, -1.03, 0.77, -0.07], // 5: Supraorbital brow ridge
-    [ 0.32,  0.81, -1.00, 0.75, -0.09], // 6: Nasion (bridge indentation) & eye level
-    [ 0.18,  0.95, -0.94, 0.73, -0.02], // 7: Mid nasal dorsum & cheekbones
-    [ 0.05,  1.07, -0.84, 0.69,  0.04], // 8: Nasal tip (Pronasion) & ear mid
-    [-0.03,  0.88, -0.72, 0.65,  0.04], // 9: Subnasale (base of nose)
-    [-0.11,  0.93, -0.60, 0.61,  0.08], // 10: Upper lip peak (Labrale superius)
-    [-0.17,  0.88, -0.52, 0.58,  0.10], // 11: Oral fissure (mouth line) & occiput base
-    [-0.24,  0.91, -0.46, 0.55,  0.14], // 12: Lower lip (Labrale inferius)
-    [-0.31,  0.83, -0.44, 0.51,  0.13], // 13: Mentolabial fold (chin crease)
-    [-0.43,  0.89, -0.44, 0.45,  0.16], // 14: Chin prominence (Pogonion)
-    [-0.53,  0.68, -0.45, 0.40,  0.08], // 15: Under chin (Submental floor)
-    [-0.60,  0.32, -0.46, 0.37, -0.07], // 16: Cervicomental throat angle
-    [-0.78,  0.26, -0.47, 0.36, -0.10], // 17: Upper-mid neck / larynx
-    [-1.02,  0.24, -0.48, 0.37, -0.12], // 18: Mid cervical neck
-    [-1.26,  0.23, -0.51, 0.41, -0.14], // 19: Lower neck
-    [-1.44,  0.25, -0.58, 0.54, -0.16], // 20: Suprasternal notch / trapezius flare
-    [-1.58,  0.30, -0.68, 0.78, -0.19]  // 21: Clavicle & shoulder base
-  ];
+  function smoothstep(edge0, edge1, x) {
+    const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
+    return t * t * (3 - 2 * t);
+  }
 
-  function evalAnatomicalSurface(u, sliceIdx) {
-    const [y, zF, zB, rx, zOff] = PROFILE_SLICES[sliceIdx];
+  function evalAnatomicalSurface(u, v) {
     const theta = (u - 0.5) * Math.PI * 2.0; // 0 = front (+Z)
     const sinT = Math.sin(theta);
     const cosT = Math.cos(theta);
 
-    const zMid = (zF + zB) * 0.5;
-    const rz = (zF - zB) * 0.5;
-    let x = sinT * rx;
-    let z = zMid + cosT * rz;
+    const headSplit = 0.66;
 
-    // Refine anterior facial landmarks so sides don't bulge like a sphere
-    if (cosT > 0 && sliceIdx >= 4 && sliceIdx <= 15) {
-      const lateralFactor = Math.pow(Math.abs(sinT), 1.4);
-      // Narrow nose ridge laterally on slices 6..9
-      if (sliceIdx >= 6 && sliceIdx <= 9) {
-        const noseSharpness = Math.exp(-Math.pow(x / 0.13, 2));
-        const baseZ = 0.80 + cosT * 0.04;
-        z = baseZ + (z - baseZ) * noseSharpness;
-        // Nostrils (alae) on slice 8-9
-        if (sliceIdx >= 8) {
-          const ala = Math.exp(-Math.pow((Math.abs(x) - 0.11) / 0.055, 2));
-          z += ala * 0.065;
+    if (v <= headSplit) {
+      const hv = v / headSplit; // 0 = crown, 1 = cervicomental junction
+      const phi = hv * Math.PI * 0.90;
+      const sinP = Math.sin(phi);
+      const cosP = Math.cos(phi);
+
+      // Smooth human cranial & facial proportions
+      let x = sinP * sinT * 0.73;
+      let y = cosP * 1.05 + 0.11;
+      let z = sinP * cosT * 0.86 - 0.06;
+
+      // Smooth occipital fullness in back & gentle taper toward nape
+      if (cosT < 0) {
+        const backMask = Math.pow(-cosT, 1.3);
+        const craniumBack = smoothstep(-0.20, 0.35, y);
+        const napeTaper = smoothstep(0.05, -0.58, y);
+        z -= backMask * craniumBack * 0.11;
+        z += backMask * napeTaper * 0.24;
+      }
+
+      // Gentle facial oval taper from temples down to jawline (no wide/protruding cheekbones)
+      if (y < 0.22) {
+        const lowerT = smoothstep(0.22, -0.56, y);
+        x *= (1.0 - lowerT * 0.26);
+        z *= (1.0 - lowerT * 0.06);
+      }
+
+      // Subtle, natural anterior facial landmarks (no harsh ridges)
+      if (cosT > 0) {
+        const front = Math.pow(cosT, 1.5);
+
+        // Soft supraorbital brow contour
+        const brow = Math.exp(-Math.pow((y - 0.33) / 0.11, 2)) * Math.exp(-Math.pow(x / 0.50, 2));
+        z += brow * 0.045 * front;
+
+        // Gentle orbital eye recess
+        const eyeL = Math.pow((x - 0.26) / 0.15, 2) + Math.pow((y - 0.23) / 0.095, 2);
+        const eyeR = Math.pow((x + 0.26) / 0.15, 2) + Math.pow((y - 0.23) / 0.095, 2);
+        z -= (Math.exp(-eyeL) + Math.exp(-eyeR)) * 0.052 * front;
+
+        // Very soft, smooth cheek contour (flat/natural, zero protruding cheekbone)
+        const cheekL = Math.pow((x - 0.36) / 0.22, 2) + Math.pow((y - 0.03) / 0.18, 2);
+        const cheekR = Math.pow((x + 0.36) / 0.22, 2) + Math.pow((y - 0.03) / 0.18, 2);
+        z += (Math.exp(-cheekL) + Math.exp(-cheekR)) * 0.014 * front;
+
+        // Refined human nose bridge, tip & soft nostrils
+        if (y < 0.30 && y > -0.10) {
+          const noseVert = smoothstep(0.30, 0.06, y) * smoothstep(-0.10, 0.03, y);
+          const ridgeW = 0.075 + smoothstep(0.24, 0.02, y) * 0.045;
+          const noseBridge = Math.exp(-Math.pow(x / ridgeW, 2)) * noseVert;
+          z += noseBridge * 0.22 * front;
+
+          const alaL = Math.exp(-Math.pow((x - 0.105) / 0.055, 2) - Math.pow((y + 0.01) / 0.042, 2));
+          const alaR = Math.exp(-Math.pow((x + 0.105) / 0.055, 2) - Math.pow((y + 0.01) / 0.042, 2));
+          z += (alaL + alaR) * 0.055 * front;
         }
-      }
-      // Subtle eye socket recesses on slice 6
-      if (sliceIdx === 6) {
-        const socket = Math.exp(-Math.pow((Math.abs(x) - 0.27) / 0.14, 2));
-        z -= socket * 0.075;
-      }
-      // Taper sides of lips and chin smoothly toward cheeks/jaw
-      if (sliceIdx >= 10 && sliceIdx <= 14) {
-        z -= lateralFactor * 0.12;
-      }
-    }
 
-    return new THREE.Vector3(x, y, z);
+        // Soft upper & lower lip fullness + natural chin
+        const upperLip = Math.exp(-Math.pow(x / 0.21, 2) - Math.pow((y + 0.12) / 0.045, 2));
+        const oralCrease = Math.exp(-Math.pow(x / 0.20, 2) - Math.pow((y + 0.17) / 0.024, 2));
+        const lowerLip = Math.exp(-Math.pow(x / 0.19, 2) - Math.pow((y + 0.22) / 0.045, 2));
+        const chinFold = Math.exp(-Math.pow(x / 0.20, 2) - Math.pow((y + 0.30) / 0.05, 2));
+        const chin = Math.exp(-Math.pow(x / 0.22, 2) - Math.pow((y + 0.43) / 0.11, 2));
+
+        z += (upperLip * 0.055 - oralCrease * 0.035 + lowerLip * 0.050 - chinFold * 0.030 + chin * 0.095) * front;
+      }
+
+      // Smooth submental blend into neck collar at hv -> 1
+      const neckBlend = smoothstep(0.84, 1.0, hv);
+      if (neckBlend > 0) {
+        const neckX = sinT * 0.35;
+        const neckY = -0.58;
+        const neckZ = -0.10 + cosT * 0.34;
+        x = x * (1 - neckBlend) + neckX * neckBlend;
+        y = y * (1 - neckBlend) + neckY * neckBlend;
+        z = z * (1 - neckBlend) + neckZ * neckBlend;
+      }
+
+      return new THREE.Vector3(x, y, z);
+    } else {
+      // Seamless Cervical Neck -> Clavicle / Shoulder Transition
+      const nt = (v - headSplit) / (1.0 - headSplit); // 0..1
+      const y = -0.58 - nt * 0.92;
+      const flare = Math.pow(nt, 2.1);
+      const rx = 0.35 + flare * 0.40;
+      const zFront = 0.24 + flare * 0.06;
+      const zBack = -0.44 - flare * 0.20;
+      const zMid = (zFront + zBack) * 0.5;
+      const rz = (zFront - zBack) * 0.5;
+      return new THREE.Vector3(sinT * rx, y, zMid + cosT * rz);
+    }
   }
 
-  const uCols = 40;
-  const vRows = PROFILE_SLICES.length - 1;
-
-  // Build smooth translucent X-ray skin mesh for depth perception
+  // High-resolution smooth shell for clean normals (zero polygon faceting)
+  const shellU = 64;
+  const shellV = 48;
   const shellGeo = new THREE.BufferGeometry();
   const shellVerts = [];
   const shellIndices = [];
-  for (let iv = 0; iv <= vRows; iv++) {
-    for (let iu = 0; iu <= uCols; iu++) {
-      const p = evalAnatomicalSurface(iu / uCols, iv);
+  for (let iv = 0; iv <= shellV; iv++) {
+    for (let iu = 0; iu <= shellU; iu++) {
+      const p = evalAnatomicalSurface(iu / shellU, iv / shellV);
       shellVerts.push(p.x, p.y, p.z);
     }
   }
-  for (let iv = 0; iv < vRows; iv++) {
-    for (let iu = 0; iu < uCols; iu++) {
-      const a = iv * (uCols + 1) + iu;
+  for (let iv = 0; iv < shellV; iv++) {
+    for (let iu = 0; iu < shellU; iu++) {
+      const a = iv * (shellU + 1) + iu;
       const b = a + 1;
-      const c = (iv + 1) * (uCols + 1) + iu;
+      const c = (iv + 1) * (shellU + 1) + iu;
       const d = c + 1;
       shellIndices.push(a, c, b, b, c, d);
     }
@@ -161,20 +201,22 @@ window.AgHead3D = (() => {
   shellGeo.computeVertexNormals();
   root.add(new THREE.Mesh(shellGeo, xrayShellMat));
 
-  // Build clean Quad-Wireframe Lines over the anatomical surface
-  for (let iv = 1; iv < vRows; iv++) {
+  // Clean Quad-Wireframe Contours sampled from the exact smooth surface
+  const wireU = 36;
+  const wireV = 26;
+  for (let iv = 1; iv < wireV; iv++) {
     const pts = [];
-    for (let iu = 0; iu <= uCols; iu++) {
-      pts.push(evalAnatomicalSurface(iu / uCols, iv));
+    for (let iu = 0; iu <= wireU; iu++) {
+      pts.push(evalAnatomicalSurface(iu / wireU, iv / wireV));
     }
     root.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), outerGridMat));
   }
-  for (let iu = 0; iu < uCols; iu++) {
+  for (let iu = 0; iu < wireU; iu++) {
     const pts = [];
-    for (let iv = 0; iv <= vRows; iv++) {
-      pts.push(evalAnatomicalSurface(iu / uCols, iv));
+    for (let iv = 0; iv <= wireV; iv++) {
+      pts.push(evalAnatomicalSurface(iu / wireU, iv / wireV));
     }
-    const isSagittal = (iu === uCols / 2 || iu === 0);
+    const isSagittal = (iu === wireU / 2 || iu === 0);
     root.add(new THREE.Line(
       new THREE.BufferGeometry().setFromPoints(pts),
       isSagittal ? profileLineMat : outerGridMat
@@ -182,10 +224,10 @@ window.AgHead3D = (() => {
   }
 
   // =========================================================================
-  // 2. INTERNAL CEREBRAL CORTEX & CEREBELLUM WIREFRAME (Inspired by Reference)
+  // 2. INTERNAL CEREBRAL CORTEX & CEREBELLUM WIREFRAME
   // =========================================================================
   const brainGroup = new THREE.Group();
-  brainGroup.position.set(0, 0.64, -0.10);
+  brainGroup.position.set(0, 0.62, -0.10);
 
   [-1, 1].forEach(side => {
     const hemiLines = 11;
@@ -195,17 +237,15 @@ window.AgHead3D = (() => {
       const pts = [];
       const steps = 34;
       for (let s = 0; s <= steps; s++) {
-        const theta = (s / steps) * Math.PI; // 0 = front, PI = back
-        const rBase = 0.56;
-        // Convoluted cortical gyri/sulci folds
+        const theta = (s / steps) * Math.PI;
+        const rBase = 0.53;
         const gyrus =
-          0.024 * Math.sin(theta * 9.0 + l * 1.7) * Math.sin(phi * 7.0) +
-          0.015 * Math.cos(theta * 14.0 - l * 2.3);
+          0.022 * Math.sin(theta * 9.0 + l * 1.7) * Math.sin(phi * 7.0) +
+          0.014 * Math.cos(theta * 14.0 - l * 2.3);
         const r = rBase + gyrus;
-        let bx = side * (0.035 + Math.sin(phi) * Math.sin(theta) * r * 0.92);
-        let by = Math.cos(phi) * r * 0.76;
-        let bz = Math.cos(theta) * r * 1.24;
-        // Temporal lobe tuck under frontal lobe
+        let bx = side * (0.032 + Math.sin(phi) * Math.sin(theta) * r * 0.90);
+        let by = Math.cos(phi) * r * 0.75;
+        let bz = Math.cos(theta) * r * 1.22;
         if (by < -0.05 && bz > 0.05) {
           by *= 0.65;
         }
@@ -215,14 +255,13 @@ window.AgHead3D = (() => {
     }
   });
 
-  // Cerebellum tucked at posterior cranial base
   for (let c = 0; c < 6; c++) {
-    const yf = -0.34 - c * 0.032;
-    const w = 0.34 * Math.sin(((c + 1) / 7) * Math.PI);
+    const yf = -0.32 - c * 0.030;
+    const w = 0.32 * Math.sin(((c + 1) / 7) * Math.PI);
     const pts = [];
     for (let s = 0; s <= 20; s++) {
       const a = (s / 20) * Math.PI * 2;
-      pts.push(new THREE.Vector3(Math.cos(a) * w, yf, -0.46 + Math.sin(a) * w * 0.55));
+      pts.push(new THREE.Vector3(Math.cos(a) * w, yf, -0.44 + Math.sin(a) * w * 0.55));
     }
     brainGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), cerebellumMat));
   }
@@ -235,64 +274,58 @@ window.AgHead3D = (() => {
   for (let v = 0; v < 7; v++) {
     const t = v / 6;
     const vy = -0.28 - v * 0.175;
-    // Natural cervical lordosis curve
-    const vz = -0.22 + Math.sin(t * Math.PI) * 0.045 - t * 0.06;
+    const vz = -0.20 + Math.sin(t * Math.PI) * 0.045 - t * 0.06;
 
-    // Vertebral body cylinder ring
     const bodyPts = [];
     for (let k = 0; k <= 18; k++) {
       const a = (k / 18) * Math.PI * 2;
-      bodyPts.push(new THREE.Vector3(Math.cos(a) * 0.11, vy, vz + Math.sin(a) * 0.095));
+      bodyPts.push(new THREE.Vector3(Math.cos(a) * 0.105, vy, vz + Math.sin(a) * 0.09));
     }
     spineGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(bodyPts), spineLineMat));
 
-    // Posterior neural arch & spinous process pointing backward
     const spinousPts = [
-      new THREE.Vector3(-0.09, vy + 0.02, vz - 0.04),
-      new THREE.Vector3( 0.00, vy - 0.04, vz - 0.23 - (v === 6 ? 0.04 : 0)),
-      new THREE.Vector3( 0.09, vy + 0.02, vz - 0.04)
+      new THREE.Vector3(-0.085, vy + 0.02, vz - 0.04),
+      new THREE.Vector3( 0.000, vy - 0.04, vz - 0.21 - (v === 6 ? 0.035 : 0)),
+      new THREE.Vector3( 0.085, vy + 0.02, vz - 0.04)
     ];
     spineGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(spinousPts), spineLineMat));
   }
   root.add(spineGroup);
 
   // =========================================================================
-  // 4. CRANIOFACIAL SKELETON: EYES, ZYGOMATIC ARCH, MAXILLARY TEETH & EARS
+  // 4. CRANIOFACIAL FEATURES: EYES, SUBTLE ZYGOMATIC ARCH, TEETH & EARS
   // =========================================================================
   function createAnatomicalEye(side) {
     const eyeGroup = new THREE.Group();
-    eyeGroup.position.set(side * 0.26, 0.31, 0.72);
+    eyeGroup.position.set(side * 0.25, 0.24, 0.71);
     eyeGroup.rotation.y = side * 0.22;
 
-    // Almond eyelid fissure
     const lidPts = [];
     for (let k = 0; k <= 32; k++) {
       const a = (k / 32) * Math.PI * 2;
-      const ex = Math.cos(a) * 0.135;
-      const ey = Math.sin(a) * 0.065 * (1.0 - 0.25 * Math.abs(Math.cos(a)));
-      const ez = (1.0 - Math.pow(ex / 0.14, 2)) * 0.032;
+      const ex = Math.cos(a) * 0.13;
+      const ey = Math.sin(a) * 0.062 * (1.0 - 0.25 * Math.abs(Math.cos(a)));
+      const ez = (1.0 - Math.pow(ex / 0.135, 2)) * 0.030;
       lidPts.push(new THREE.Vector3(ex, ey, ez));
     }
     eyeGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(lidPts), profileLineMat));
 
-    // Iris & Pupil rings
-    [0.062, 0.030].forEach(r => {
+    [0.058, 0.028].forEach(r => {
       const pts = [];
       for (let k = 0; k <= 24; k++) {
         const a = (k / 24) * Math.PI * 2;
-        pts.push(new THREE.Vector3(Math.cos(a) * r, Math.sin(a) * r, 0.034));
+        pts.push(new THREE.Vector3(Math.cos(a) * r, Math.sin(a) * r, 0.032));
       }
       eyeGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), jawLineMat));
     });
 
-    // Brow arch
     const browPts = [];
     for (let k = 0; k <= 16; k++) {
       const t = (k / 16) * 2 - 1;
       browPts.push(new THREE.Vector3(
-        t * 0.155,
-        0.115 + (1 - t * t) * 0.038 - t * side * 0.015,
-        0.045 - Math.abs(t) * 0.03
+        t * 0.145,
+        0.105 + (1 - t * t) * 0.035 - t * side * 0.012,
+        0.042 - Math.abs(t) * 0.028
       ));
     }
     eyeGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(browPts), skullBoneMat));
@@ -304,30 +337,30 @@ window.AgHead3D = (() => {
   const leftEye = createAnatomicalEye(1);
   const rightEye = createAnatomicalEye(-1);
 
-  // Zygomatic Arches (Cheekbone-to-Ear Bridges) & Anatomical Ears
   [-1, 1].forEach(side => {
+    // Sleek, non-protruding internal zygomatic arch
     const zygPts = [
-      new THREE.Vector3(side * 0.36, 0.16, 0.64),
-      new THREE.Vector3(side * 0.56, 0.14, 0.42),
-      new THREE.Vector3(side * 0.64, 0.12, 0.12),
-      new THREE.Vector3(side * 0.62, 0.10, -0.06)
+      new THREE.Vector3(side * 0.34, 0.12, 0.56),
+      new THREE.Vector3(side * 0.49, 0.10, 0.36),
+      new THREE.Vector3(side * 0.56, 0.09, 0.10),
+      new THREE.Vector3(side * 0.56, 0.08, -0.06)
     ];
     root.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(zygPts), skullBoneMat));
 
-    // Helix & Antihelix Ear Contours
+    // Anatomical Ear (Helix & Antihelix)
     const helixPts = [];
     const antiPts = [];
     for (let k = 0; k <= 28; k++) {
       const a = -Math.PI * 0.62 + (k / 28) * Math.PI * 1.42;
       helixPts.push(new THREE.Vector3(
         side * (0.69 + Math.cos(a) * 0.022),
-        0.08 + Math.sin(a) * 0.19,
-        -0.12 + Math.cos(a) * 0.10
+        0.08 + Math.sin(a) * 0.18,
+        -0.12 + Math.cos(a) * 0.095
       ));
       antiPts.push(new THREE.Vector3(
         side * (0.67 + Math.cos(a) * 0.014),
-        0.08 + Math.sin(a) * 0.13,
-        -0.11 + Math.cos(a) * 0.06
+        0.08 + Math.sin(a) * 0.12,
+        -0.11 + Math.cos(a) * 0.055
       ));
     }
     root.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(helixPts), profileLineMat));
@@ -338,7 +371,7 @@ window.AgHead3D = (() => {
   const upperTeethPts = [];
   for (let k = 0; k <= 24; k++) {
     const a = -Math.PI * 0.44 + (k / 24) * Math.PI * 0.88;
-    upperTeethPts.push(new THREE.Vector3(Math.sin(a) * 0.23, -0.11, 0.46 + Math.cos(a) * 0.32));
+    upperTeethPts.push(new THREE.Vector3(Math.sin(a) * 0.21, -0.11, 0.44 + Math.cos(a) * 0.30));
   }
   root.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(upperTeethPts), teethLineMat));
 
@@ -349,26 +382,25 @@ window.AgHead3D = (() => {
   jawPivot.position.set(0, 0.06, -0.02);
 
   const jawOuterCurve = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(-0.52,  0.02, -0.04), // Left TMJ condyle
-    new THREE.Vector3(-0.46, -0.28,  0.02), // Left gonion (jaw angle)
-    new THREE.Vector3(-0.34, -0.44,  0.38),
-    new THREE.Vector3(-0.16, -0.49,  0.72),
-    new THREE.Vector3( 0.00, -0.50,  0.80), // Chin (Menton)
-    new THREE.Vector3( 0.16, -0.49,  0.72),
-    new THREE.Vector3( 0.34, -0.44,  0.38),
-    new THREE.Vector3( 0.46, -0.28,  0.02),
-    new THREE.Vector3( 0.52,  0.02, -0.04)
+    new THREE.Vector3(-0.48,  0.02, -0.04),
+    new THREE.Vector3(-0.43, -0.27,  0.02),
+    new THREE.Vector3(-0.31, -0.43,  0.36),
+    new THREE.Vector3(-0.15, -0.48,  0.68),
+    new THREE.Vector3( 0.00, -0.49,  0.76),
+    new THREE.Vector3( 0.15, -0.48,  0.68),
+    new THREE.Vector3( 0.31, -0.43,  0.36),
+    new THREE.Vector3( 0.43, -0.27,  0.02),
+    new THREE.Vector3( 0.48,  0.02, -0.04)
   ]);
   jawPivot.add(new THREE.Line(
     new THREE.BufferGeometry().setFromPoints(jawOuterCurve.getPoints(72)),
     jawLineMat
   ));
 
-  // Lower Mandibular Teeth Arch
   const lowerTeethPts = [];
   for (let k = 0; k <= 24; k++) {
     const a = -Math.PI * 0.44 + (k / 24) * Math.PI * 0.88;
-    lowerTeethPts.push(new THREE.Vector3(Math.sin(a) * 0.21, -0.24, 0.46 + Math.cos(a) * 0.30));
+    lowerTeethPts.push(new THREE.Vector3(Math.sin(a) * 0.19, -0.23, 0.44 + Math.cos(a) * 0.28));
   }
   jawPivot.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(lowerTeethPts), teethLineMat));
   root.add(jawPivot);
@@ -380,7 +412,7 @@ window.AgHead3D = (() => {
   glottisGroup.position.set(0, -1.16, 0.04);
   for (let r = 0; r < 8; r++) {
     const pts = [];
-    const radius = 0.13 + (r / 8) * 0.035;
+    const radius = 0.125 + (r / 8) * 0.032;
     for (let k = 0; k <= 26; k++) {
       const a = (k / 26) * Math.PI * 2;
       pts.push(new THREE.Vector3(Math.cos(a) * radius, r * 0.078, Math.sin(a) * radius * 0.85));
@@ -393,13 +425,13 @@ window.AgHead3D = (() => {
   root.add(glottisGroup);
 
   const palate = new THREE.Object3D();
-  palate.position.set(0, 0.04, 0.52);
+  palate.position.set(0, 0.04, 0.50);
   root.add(palate);
 
   for (let p = 0; p < 6; p++) {
-    const zPos = 0.24 + p * 0.095;
-    const width = 0.22 - Math.pow(p / 6, 1.6) * 0.08;
-    const archH = 0.085 - (p / 6) * 0.022;
+    const zPos = 0.22 + p * 0.092;
+    const width = 0.20 - Math.pow(p / 6, 1.6) * 0.075;
+    const archH = 0.080 - (p / 6) * 0.020;
     const archPts = [];
     for (let k = 0; k <= 16; k++) {
       const a = (k / 16) * Math.PI;
@@ -413,18 +445,17 @@ window.AgHead3D = (() => {
   }
 
   const velumPivot = new THREE.Group();
-  velumPivot.position.set(0, 0.00, 0.24);
+  velumPivot.position.set(0, 0.00, 0.22);
   const velumPts = [
-    new THREE.Vector3(-0.12, 0, 0),
-    new THREE.Vector3( 0.12, 0, 0),
-    new THREE.Vector3( 0.09, -0.08, -0.14),
-    new THREE.Vector3(-0.09, -0.08, -0.14),
-    new THREE.Vector3(-0.12, 0, 0)
+    new THREE.Vector3(-0.11, 0, 0),
+    new THREE.Vector3( 0.11, 0, 0),
+    new THREE.Vector3( 0.08, -0.08, -0.14),
+    new THREE.Vector3(-0.08, -0.08, -0.14),
+    new THREE.Vector3(-0.11, 0, 0)
   ];
   velumPivot.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(velumPts), jawLineMat));
   root.add(velumPivot);
 
-  // Articulated Anatomical Tongue Grid
   const tongueGroup = new THREE.Group();
   const tSlices = 12;
   const tArcSegs = 14;
@@ -449,16 +480,16 @@ window.AgHead3D = (() => {
 
     for (const item of tongueLines) {
       const s = item.is / item.total;
-      const zBase = 0.16 + s * 0.58 + tx * Math.sin(s * Math.PI);
-      const halfW = 0.17 * Math.sin(Math.pow(s, 0.72) * Math.PI * 0.88 + 0.18);
-      const dorsalArch = Math.sin(s * Math.PI) * (0.055 + ty);
+      const zBase = 0.15 + s * 0.56 + tx * Math.sin(s * Math.PI);
+      const halfW = 0.16 * Math.sin(Math.pow(s, 0.72) * Math.PI * 0.88 + 0.18);
+      const dorsalArch = Math.sin(s * Math.PI) * (0.052 + ty);
       const yBase = -0.22 + s * 0.025 + dorsalArch;
 
       const pos = item.line.geometry.attributes.position;
       for (let ia = 0; ia <= tArcSegs; ia++) {
         const a = (ia / tArcSegs) * Math.PI;
         const x = Math.cos(a) * halfW;
-        const y = yBase + Math.sin(a) * (0.04 + Math.max(0, ty) * 0.22);
+        const y = yBase + Math.sin(a) * (0.038 + Math.max(0, ty) * 0.22);
         pos.setXYZ(ia, x, y, zBase);
         if (ia === tArcSegs / 2) {
           spinePos.setXYZ(item.is, 0, y + 0.004, zBase);
@@ -470,9 +501,8 @@ window.AgHead3D = (() => {
   }
   updateTongueGrid(0.48, 0.32);
 
-  // Sculpted Human Cupid's Bow Upper & Lower Lip Wireframes
   const lipGroup = new THREE.Group();
-  lipGroup.position.set(0, -0.165, 0.88);
+  lipGroup.position.set(0, -0.165, 0.82);
   root.add(lipGroup);
 
   const upperLip = new THREE.Object3D();
@@ -480,23 +510,23 @@ window.AgHead3D = (() => {
   lipGroup.add(upperLip);
 
   const upperLipPts = [
-    new THREE.Vector3(-0.18,  0.000, -0.055),
-    new THREE.Vector3(-0.09,  0.015,  0.012),
-    new THREE.Vector3(-0.035, 0.028,  0.042),
-    new THREE.Vector3( 0.00,  0.019,  0.045),
-    new THREE.Vector3( 0.035, 0.028,  0.042),
-    new THREE.Vector3( 0.09,  0.015,  0.012),
-    new THREE.Vector3( 0.18,  0.000, -0.055)
+    new THREE.Vector3(-0.17,  0.000, -0.050),
+    new THREE.Vector3(-0.085, 0.014,  0.010),
+    new THREE.Vector3(-0.032, 0.026,  0.038),
+    new THREE.Vector3( 0.000, 0.018,  0.041),
+    new THREE.Vector3( 0.032, 0.026,  0.038),
+    new THREE.Vector3( 0.085, 0.014,  0.010),
+    new THREE.Vector3( 0.17,  0.000, -0.050)
   ];
   const upperLipLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(upperLipPts), lipLineMat);
   lipGroup.add(upperLipLine);
 
   const lowerLipPts = [
-    new THREE.Vector3(-0.18,  0.000, -0.055),
-    new THREE.Vector3(-0.085,-0.022,  0.015),
-    new THREE.Vector3( 0.00, -0.030,  0.036),
-    new THREE.Vector3( 0.085,-0.022,  0.015),
-    new THREE.Vector3( 0.18,  0.000, -0.055)
+    new THREE.Vector3(-0.17,  0.000, -0.050),
+    new THREE.Vector3(-0.080,-0.020,  0.014),
+    new THREE.Vector3( 0.000,-0.028,  0.034),
+    new THREE.Vector3( 0.080,-0.020,  0.014),
+    new THREE.Vector3( 0.17,  0.000, -0.050)
   ];
   const lowerLipLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(lowerLipPts), lipLineMat);
   lipGroup.add(lowerLipLine);
@@ -504,7 +534,7 @@ window.AgHead3D = (() => {
   const waveRings = [];
   for (let w = 0; w < 3; w++) {
     const wr = new THREE.Mesh(new THREE.RingGeometry(0.14, 0.162, 28), waveRingMat.clone());
-    wr.position.set(0, -0.165, 0.94);
+    wr.position.set(0, -0.165, 0.88);
     root.add(wr);
     waveRings.push(wr);
   }
@@ -553,7 +583,7 @@ window.AgHead3D = (() => {
 
     const openAmt = Math.max(0, state.lip_open - 0.10);
     const roundScaleX = 1.0 - state.lip_round * 0.34;
-    const protrudeZ = 0.88 + state.lip_round * 0.08;
+    const protrudeZ = 0.82 + state.lip_round * 0.08;
 
     lipGroup.position.set(0, -0.165 - state.jaw_open * 0.025, protrudeZ);
     lipGroup.scale.set(roundScaleX, 1.0, 1.0);
