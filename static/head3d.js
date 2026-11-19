@@ -1,14 +1,14 @@
 window.AgHead3D = (() => {
   const container = document.getElementById("threeContainer");
-  const scene = new THREE.Scene();
   const getStageW = () => container.clientWidth || window.innerWidth;
   const getStageH = () => container.clientHeight || window.innerHeight;
+
+  const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(32, getStageW() / getStageH(), 0.1, 100);
-  camera.position.set(3.2, 0.05, 4.4);
+  camera.position.set(getStageW() < 768 ? 2.5 : 3.2, 0.05, getStageW() < 768 ? 4.9 : 4.4);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setSize(getStageW(), getStageH());
-  if (getStageW() < 768) camera.position.set(2.5, 0.02, 4.9);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   container.appendChild(renderer.domElement);
 
@@ -17,7 +17,6 @@ window.AgHead3D = (() => {
   controls.dampingFactor = 0.06;
   controls.target.set(0.0, -0.18, 0.05);
 
-  // Ultra-Clean Holographic Edge-Only Fresnel Shell (No Fleshy/Muddy Bulk)
   const xrayShellMat = new THREE.ShaderMaterial({
     transparent: true,
     depthWrite: false,
@@ -50,7 +49,6 @@ window.AgHead3D = (() => {
     `
   });
 
-  // Clean Anatomical Wireframe Line Materials
   const outerGridMat = new THREE.LineBasicMaterial({ color: 0xa855f7, transparent: true, opacity: 0.18 });
   const profileLineMat = new THREE.LineBasicMaterial({ color: 0xe9d5ff, transparent: true, opacity: 0.65 });
   const brainLineMat = new THREE.LineBasicMaterial({ color: 0xc084fc, transparent: true, opacity: 0.44 });
@@ -70,33 +68,27 @@ window.AgHead3D = (() => {
   const root = new THREE.Group();
   scene.add(root);
 
-  // =========================================================================
-  // 1. SEAMLESS C2-CONTINUOUS HUMAN HEAD & NECK SURFACE (Soft Cheeks, No Protrusions)
-  // =========================================================================
   function smoothstep(edge0, edge1, x) {
     const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
     return t * t * (3 - 2 * t);
   }
 
   function evalAnatomicalSurface(u, v) {
-    const theta = (u - 0.5) * Math.PI * 2.0; // 0 = front (+Z)
+    const theta = (u - 0.5) * Math.PI * 2.0;
     const sinT = Math.sin(theta);
     const cosT = Math.cos(theta);
-
     const headSplit = 0.66;
 
     if (v <= headSplit) {
-      const hv = v / headSplit; // 0 = crown, 1 = cervicomental junction
+      const hv = v / headSplit;
       const phi = hv * Math.PI * 0.90;
       const sinP = Math.sin(phi);
       const cosP = Math.cos(phi);
 
-      // Smooth human cranial & facial proportions
       let x = sinP * sinT * 0.73;
       let y = cosP * 1.05 + 0.11;
       let z = sinP * cosT * 0.86 - 0.06;
 
-      // Smooth occipital fullness in back & gentle taper toward nape
       if (cosT < 0) {
         const backMask = Math.pow(-cosT, 1.3);
         const craniumBack = smoothstep(-0.20, 0.35, y);
@@ -105,32 +97,26 @@ window.AgHead3D = (() => {
         z += backMask * napeTaper * 0.24;
       }
 
-      // Gentle facial oval taper from temples down to jawline (no wide/protruding cheekbones)
       if (y < 0.22) {
         const lowerT = smoothstep(0.22, -0.56, y);
         x *= (1.0 - lowerT * 0.26);
         z *= (1.0 - lowerT * 0.06);
       }
 
-      // Subtle, natural anterior facial landmarks (no harsh ridges)
       if (cosT > 0) {
         const front = Math.pow(cosT, 1.5);
 
-        // Soft supraorbital brow contour
         const brow = Math.exp(-Math.pow((y - 0.33) / 0.11, 2)) * Math.exp(-Math.pow(x / 0.50, 2));
         z += brow * 0.045 * front;
 
-        // Gentle orbital eye recess
         const eyeL = Math.pow((x - 0.26) / 0.15, 2) + Math.pow((y - 0.23) / 0.095, 2);
         const eyeR = Math.pow((x + 0.26) / 0.15, 2) + Math.pow((y - 0.23) / 0.095, 2);
         z -= (Math.exp(-eyeL) + Math.exp(-eyeR)) * 0.052 * front;
 
-        // Very soft, smooth cheek contour (flat/natural, zero protruding cheekbone)
         const cheekL = Math.pow((x - 0.36) / 0.22, 2) + Math.pow((y - 0.03) / 0.18, 2);
         const cheekR = Math.pow((x + 0.36) / 0.22, 2) + Math.pow((y - 0.03) / 0.18, 2);
         z += (Math.exp(-cheekL) + Math.exp(-cheekR)) * 0.014 * front;
 
-        // Refined human nose bridge, tip & soft nostrils
         if (y < 0.30 && y > -0.10) {
           const noseVert = smoothstep(0.30, 0.06, y) * smoothstep(-0.10, 0.03, y);
           const ridgeW = 0.075 + smoothstep(0.24, 0.02, y) * 0.045;
@@ -142,7 +128,6 @@ window.AgHead3D = (() => {
           z += (alaL + alaR) * 0.055 * front;
         }
 
-        // Soft upper & lower lip fullness + natural chin
         const upperLip = Math.exp(-Math.pow(x / 0.21, 2) - Math.pow((y + 0.12) / 0.045, 2));
         const oralCrease = Math.exp(-Math.pow(x / 0.20, 2) - Math.pow((y + 0.17) / 0.024, 2));
         const lowerLip = Math.exp(-Math.pow(x / 0.19, 2) - Math.pow((y + 0.22) / 0.045, 2));
@@ -152,7 +137,6 @@ window.AgHead3D = (() => {
         z += (upperLip * 0.055 - oralCrease * 0.035 + lowerLip * 0.050 - chinFold * 0.030 + chin * 0.095) * front;
       }
 
-      // Smooth submental blend into neck collar at hv -> 1
       const neckBlend = smoothstep(0.84, 1.0, hv);
       if (neckBlend > 0) {
         const neckX = sinT * 0.35;
@@ -165,8 +149,7 @@ window.AgHead3D = (() => {
 
       return new THREE.Vector3(x, y, z);
     } else {
-      // Seamless Cervical Neck -> Clavicle / Shoulder Transition
-      const nt = (v - headSplit) / (1.0 - headSplit); // 0..1
+      const nt = (v - headSplit) / (1.0 - headSplit);
       const y = -0.58 - nt * 0.92;
       const flare = Math.pow(nt, 2.1);
       const rx = 0.35 + flare * 0.40;
@@ -178,7 +161,6 @@ window.AgHead3D = (() => {
     }
   }
 
-  // High-resolution smooth shell for clean normals (zero polygon faceting)
   const shellU = 64;
   const shellV = 48;
   const shellGeo = new THREE.BufferGeometry();
@@ -204,7 +186,6 @@ window.AgHead3D = (() => {
   shellGeo.computeVertexNormals();
   root.add(new THREE.Mesh(shellGeo, xrayShellMat));
 
-  // Clean Quad-Wireframe Contours sampled from the exact smooth surface
   const wireU = 36;
   const wireV = 26;
   for (let iv = 1; iv < wireV; iv++) {
@@ -226,9 +207,6 @@ window.AgHead3D = (() => {
     ));
   }
 
-  // =========================================================================
-  // 2. INTERNAL CEREBRAL CORTEX & CEREBELLUM WIREFRAME
-  // =========================================================================
   const brainGroup = new THREE.Group();
   brainGroup.position.set(0, 0.62, -0.10);
 
@@ -270,9 +248,6 @@ window.AgHead3D = (() => {
   }
   root.add(brainGroup);
 
-  // =========================================================================
-  // 3. CERVICAL SPINE VERTEBRAE (C1–C7 WITH SPINOUS PROCESSES)
-  // =========================================================================
   const spineGroup = new THREE.Group();
   for (let v = 0; v < 7; v++) {
     const t = v / 6;
@@ -295,9 +270,6 @@ window.AgHead3D = (() => {
   }
   root.add(spineGroup);
 
-  // =========================================================================
-  // 4. CRANIOFACIAL FEATURES: EYES, SUBTLE ZYGOMATIC ARCH, TEETH & EARS
-  // =========================================================================
   function createAnatomicalEye(side) {
     const eyeGroup = new THREE.Group();
     eyeGroup.position.set(side * 0.25, 0.24, 0.71);
@@ -341,7 +313,6 @@ window.AgHead3D = (() => {
   const rightEye = createAnatomicalEye(-1);
 
   [-1, 1].forEach(side => {
-    // Sleek, non-protruding internal zygomatic arch
     const zygPts = [
       new THREE.Vector3(side * 0.34, 0.12, 0.56),
       new THREE.Vector3(side * 0.49, 0.10, 0.36),
@@ -350,7 +321,6 @@ window.AgHead3D = (() => {
     ];
     root.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(zygPts), skullBoneMat));
 
-    // Anatomical Ear (Helix & Antihelix)
     const helixPts = [];
     const antiPts = [];
     for (let k = 0; k <= 28; k++) {
@@ -370,7 +340,6 @@ window.AgHead3D = (() => {
     root.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(antiPts), skullBoneMat));
   });
 
-  // Upper Maxillary Dental Arch
   const upperTeethPts = [];
   for (let k = 0; k <= 24; k++) {
     const a = -Math.PI * 0.44 + (k / 24) * Math.PI * 0.88;
@@ -378,9 +347,6 @@ window.AgHead3D = (() => {
   }
   root.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(upperTeethPts), teethLineMat));
 
-  // =========================================================================
-  // 5. ARTICULATED MANDIBLE (JAWBONE) & LOWER DENTAL ARCH
-  // =========================================================================
   const jawPivot = new THREE.Group();
   jawPivot.position.set(0, 0.06, -0.02);
 
@@ -408,9 +374,6 @@ window.AgHead3D = (() => {
   jawPivot.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(lowerTeethPts), teethLineMat));
   root.add(jawPivot);
 
-  // =========================================================================
-  // 6. INTERNAL VOCAL TRACT: TRACHEA, GLOTTIS, PALATE, TONGUE & LIPS
-  // =========================================================================
   const glottisGroup = new THREE.Group();
   glottisGroup.position.set(0, -1.16, 0.04);
   for (let r = 0; r < 8; r++) {
@@ -555,7 +518,7 @@ window.AgHead3D = (() => {
   function updateCadPins() {
     const w = window.innerWidth;
     const h = window.innerHeight;
-    if (w < 960) return;
+    if (w <= 1024) return;
 
     const pins = [
       { obj: palate, el: "pinPalate", tx: w * 0.37, ty: h * 0.24 },
@@ -620,11 +583,13 @@ window.AgHead3D = (() => {
   const sCtx = sCanvas.getContext("2d");
 
   function resizeSpectrum() {
-    sCanvas.width = sCanvas.clientWidth * devicePixelRatio;
-    sCanvas.height = sCanvas.clientHeight * devicePixelRatio;
+    if (!sCanvas) return;
+    sCanvas.width = (sCanvas.clientWidth || 260) * devicePixelRatio;
+    sCanvas.height = (sCanvas.clientHeight || 54) * devicePixelRatio;
   }
 
   function drawSpectrum(analyser) {
+    if (!sCanvas) return;
     const w = sCanvas.width;
     const h = sCanvas.height;
     sCtx.clearRect(0, 0, w, h);
@@ -654,13 +619,21 @@ window.AgHead3D = (() => {
     sCtx.stroke();
   }
 
-  window.addEventListener("resize", () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(getStageW(), getStageH());
-  if (getStageW() < 768) camera.position.set(2.5, 0.02, 4.9);
+  function handleResize() {
+    const w = getStageW();
+    const h = getStageH();
+    if (w > 0 && h > 0) {
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    }
     resizeSpectrum();
-  });
+  }
+
+  window.addEventListener("resize", handleResize);
+  if (typeof ResizeObserver !== "undefined") {
+    new ResizeObserver(handleResize).observe(container);
+  }
 
   function startLoop(onTick) {
     handleResize();
