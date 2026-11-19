@@ -2,7 +2,7 @@ window.AgHead3D = (() => {
   const container = document.getElementById("threeContainer");
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(34, window.innerWidth / window.innerHeight, 0.1, 100);
-  camera.position.set(1.85, 0.15, 4.95);
+  camera.position.set(2.4, 0.18, 4.8);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -12,438 +12,434 @@ window.AgHead3D = (() => {
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.dampingFactor = 0.06;
-  controls.target.set(0.0, -0.18, 0.12);
+  controls.target.set(0.0, -0.10, 0.12);
 
-  // Materials matching the scientific wireframe vocal-tract aesthetic in Purple & Solar Yellow
-  const headGridMat = new THREE.LineBasicMaterial({
-    color: 0x8b5cf6,
-    transparent: true,
-    opacity: 0.28
-  });
-
-  const faceLineMat = new THREE.LineBasicMaterial({
-    color: 0xc4b5fd,
-    transparent: true,
-    opacity: 0.78
-  });
-
-  const sinusLineMat = new THREE.LineBasicMaterial({
+  // Pure Wireframe Materials (Purple & Solar Yellow Theme)
+  const headGridMat = new THREE.MeshBasicMaterial({
     color: 0xa855f7,
+    wireframe: true,
     transparent: true,
-    opacity: 0.42
+    opacity: 0.20
   });
 
-  const jawMat = new THREE.MeshBasicMaterial({
-    color: 0xf43f5e,
+  const featureWireMat = new THREE.MeshBasicMaterial({
+    color: 0xc084fc,
+    wireframe: true,
     transparent: true,
-    opacity: 0.92
+    opacity: 0.58
   });
 
-  const tractRingMat = new THREE.LineBasicMaterial({
+  const featureLineMat = new THREE.LineBasicMaterial({
     color: 0xc084fc,
     transparent: true,
     opacity: 0.72
   });
 
-  const tractRibMat = new THREE.LineBasicMaterial({
-    color: 0x7e22ce,
+  const sinusLineMat = new THREE.LineBasicMaterial({
+    color: 0x9333ea,
     transparent: true,
     opacity: 0.45
   });
 
-  const tongueWireMat = new THREE.LineBasicMaterial({
+  const jawContourMat = new THREE.MeshBasicMaterial({
     color: 0xfacc15,
+    wireframe: true,
     transparent: true,
     opacity: 0.88
   });
 
-  const lipMat = new THREE.MeshBasicMaterial({
-    color: 0xf472b6,
+  const jawLineMat = new THREE.LineBasicMaterial({
+    color: 0xfacc15,
     transparent: true,
     opacity: 0.95
   });
 
-  const glottisMat = new THREE.MeshBasicMaterial({
+  const tractWireMat = new THREE.MeshBasicMaterial({
+    color: 0xe9d5ff,
+    wireframe: true,
+    transparent: true,
+    opacity: 0.42
+  });
+
+  const tractRingMat = new THREE.LineBasicMaterial({
+    color: 0xfef08a,
+    transparent: true,
+    opacity: 0.65
+  });
+
+  const tongueWireMat = new THREE.MeshBasicMaterial({
+    color: 0xe879f9,
+    wireframe: true,
+    transparent: true,
+    opacity: 0.75
+  });
+
+  const lipRingMat = new THREE.LineBasicMaterial({
     color: 0xfacc15,
     transparent: true,
-    opacity: 0.95
+    opacity: 0.92
+  });
+
+  const waveRingMat = new THREE.MeshBasicMaterial({
+    color: 0xfacc15,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.0
   });
 
   const root = new THREE.Group();
   scene.add(root);
 
-  // Helper: Build clean Quad-Grid Wireframe (horizontal latitude rings + vertical meridian lines, no messy diagonals)
-  function buildQuadGridLines(rows, cols, evalPointFn, material) {
-    const positions = [];
-    const grid = [];
-    for (let r = 0; r <= rows; r++) {
-      const rowPts = [];
-      for (let c = 0; c <= cols; c++) {
-        rowPts.push(evalPointFn(r / rows, c / cols));
-      }
-      grid.push(rowPts);
-    }
-    // Horizontal rings
-    for (let r = 0; r <= rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const a = grid[r][c], b = grid[r][c + 1];
-        positions.push(a.x, a.y, a.z, b.x, b.y, b.z);
-      }
-    }
-    // Vertical meridians
-    for (let c = 0; c < cols; c++) {
-      for (let r = 0; r < rows; r++) {
-        const a = grid[r][c], b = grid[r + 1][c];
-        positions.push(a.x, a.y, a.z, b.x, b.y, b.z);
-      }
-    }
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
-    return new THREE.LineSegments(geo, material);
-  }
-
   // =========================================================================
-  // 1. OUTER HUMAN HEAD & NECK QUAD-GRID WIREFRAME
+  // 1. OUTER WIREFRAME HEAD & NECK GRID (Quad-like Latitude/Longitude Mesh)
   // =========================================================================
-  const headWireframe = buildQuadGridLines(22, 32, (u, v) => {
-    const phi = u * Math.PI; // 0 (top) -> PI (bottom)
-    const theta = v * Math.PI * 2; // 0 -> 2PI around Y
-    let x = Math.sin(phi) * Math.sin(theta) * 0.82;
-    let y = Math.cos(phi) * 1.12;
-    let z = Math.sin(phi) * Math.cos(theta) * 0.95;
+  const headGeo = new THREE.SphereGeometry(1.0, 28, 22);
+  const hPos = headGeo.attributes.position;
+  for (let i = 0; i < hPos.count; i++) {
+    let x = hPos.getX(i);
+    let y = hPos.getY(i);
+    let z = hPos.getZ(i);
 
-    // Occiput (back of skull) & neck transition
+    x *= 0.80;
+    y *= 1.12;
+    z *= 0.94;
+
     if (z < 0) {
       if (y > -0.15) z *= 1.10;
       else {
-        z *= 0.52;
-        x *= 0.68;
+        z *= 0.58;
+        x *= 0.72;
       }
     }
-    // Jawline taper
+
     if (y < 0.05 && z > 0) {
-      const t = Math.min(1.0, (0.05 - y) / 1.12);
+      const t = Math.min(1.0, (0.05 - y) / 1.15);
       x *= (1.0 - t * 0.28);
+      z *= (1.0 - t * 0.10);
     }
-    // Subtle brow & chin contour
-    if (z > 0.3) {
-      const brow = Math.exp(-Math.pow((y - 0.26) / 0.12, 2)) * Math.exp(-Math.pow(x / 0.55, 2));
-      z += brow * 0.08;
-      const chin = Math.exp(-Math.pow(x / 0.24, 2) - Math.pow((y + 0.72) / 0.16, 2));
+
+    // Subtle brow & cheekbone structure
+    if (z > 0.35) {
+      const brow = Math.exp(-Math.pow((y - 0.26) / 0.10, 2)) * Math.exp(-Math.pow(x / 0.56, 2));
+      z += brow * 0.09;
+
+      const cheekL = Math.pow((x - 0.45) / 0.20, 2) + Math.pow((y + 0.02) / 0.14, 2);
+      const cheekR = Math.pow((x + 0.45) / 0.20, 2) + Math.pow((y + 0.02) / 0.14, 2);
+      z += (Math.exp(-cheekL) + Math.exp(-cheekR)) * 0.07;
+
+      const chin = Math.exp(-Math.pow(x / 0.22, 2) - Math.pow((y + 0.72) / 0.15, 2));
       z += chin * 0.12;
     }
-    return new THREE.Vector3(x, y + 0.22, z);
-  }, headGridMat);
-  root.add(headWireframe);
 
-  // Cylindrical Neck Quad-Grid
-  const neckWireframe = buildQuadGridLines(10, 24, (u, v) => {
-    const theta = v * Math.PI * 2;
-    const rX = 0.44 + u * 0.10;
-    const rZ = 0.42 + u * 0.08;
-    const y = -0.65 - u * 0.95;
-    return new THREE.Vector3(Math.sin(theta) * rX, y, Math.cos(theta) * rZ - 0.16);
-  }, headGridMat);
-  root.add(neckWireframe);
+    if (y < -0.82) {
+      y = -0.82 + (y + 0.82) * 0.20;
+      x *= 0.62;
+      z *= 0.62;
+    }
 
-  // =========================================================================
-  // 2. STYLIZED LINE-ART EYES, BROWS, NOSE, SINUS RINGS & EARS (Like Reference)
-  // =========================================================================
-  function makeLoop(pts, mat, closed = true) {
-    const curve = new THREE.CatmullRomCurve3(pts, closed);
-    const geo = new THREE.BufferGeometry().setFromPoints(curve.getPoints(36));
-    return new THREE.Line(geo, mat);
+    hPos.setXYZ(i, x, y, z);
   }
+  const headWire = new THREE.Mesh(headGeo, headGridMat);
+  headWire.position.set(0, 0.22, 0.0);
+  root.add(headWire);
 
-  const leftPupilGroup = new THREE.Group();
-  const rightPupilGroup = new THREE.Group();
+  // Wireframe Neck Cylinder
+  const neckGeo = new THREE.CylinderGeometry(0.42, 0.50, 1.12, 22, 8, true);
+  const nPos = neckGeo.attributes.position;
+  for (let i = 0; i < nPos.count; i++) {
+    let x = nPos.getX(i), y = nPos.getY(i), z = nPos.getZ(i);
+    const flare = Math.max(0, (-y - 0.15) / 0.45);
+    x *= (1.0 + flare * 0.22);
+    z *= 0.90;
+    nPos.setXYZ(i, x, y, z);
+  }
+  const neckWire = new THREE.Mesh(neckGeo, headGridMat);
+  neckWire.position.set(0, -1.04, -0.16);
+  root.add(neckWire);
 
+  // =========================================================================
+  // 2. WIREFRAME NOSE, SINUS LOOPS, CONCENTRIC EYES & EARS
+  // =========================================================================
+  // Sculpted Wireframe Nose Prism
+  const nosePts = [
+    new THREE.Vector3(0.00, 0.44, 0.88),
+    new THREE.Vector3(0.00, 0.12, 1.14),
+    new THREE.Vector3(0.00, 0.04, 0.94),
+    new THREE.Vector3(-0.12, 0.06, 0.91),
+    new THREE.Vector3(0.00, 0.12, 1.14),
+    new THREE.Vector3(0.12, 0.06, 0.91),
+    new THREE.Vector3(0.00, 0.04, 0.94)
+  ];
+  const noseLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(nosePts), featureLineMat);
+  root.add(noseLine);
+
+  // Nasal / Maxillary Sinus Wireframe Loops (as seen in reference)
   [-1, 1].forEach(side => {
-    const cx = side * 0.31;
-    const cy = 0.34;
-    const cz = 0.86;
-
-    // Outer & inner eye contour loops
-    const eyeOuter = makeLoop([
-      new THREE.Vector3(cx - 0.13, cy,        cz - 0.03),
-      new THREE.Vector3(cx,        cy + 0.075, cz + 0.02),
-      new THREE.Vector3(cx + 0.13, cy,        cz - 0.03),
-      new THREE.Vector3(cx,        cy - 0.065, cz + 0.01)
-    ], faceLineMat, true);
-    root.add(eyeOuter);
-
-    // Eyebrow arch
-    const brow = makeLoop([
-      new THREE.Vector3(cx - 0.15 * side, cy + 0.12, cz - 0.02),
-      new THREE.Vector3(cx,               cy + 0.16, cz + 0.02),
-      new THREE.Vector3(cx + 0.14 * side, cy + 0.11, cz - 0.04)
-    ], faceLineMat, false);
-    root.add(brow);
-
-    // Pupil circle
-    const pGroup = side === 1 ? leftPupilGroup : rightPupilGroup;
-    pGroup.position.set(cx, cy, cz + 0.015);
-    const pupilRing = makeLoop([
-      new THREE.Vector3(-0.042, 0, 0),
-      new THREE.Vector3(0, 0.045, 0),
-      new THREE.Vector3(0.042, 0, 0),
-      new THREE.Vector3(0, -0.045, 0)
-    ], faceLineMat, true);
-    pGroup.add(pupilRing);
-    root.add(pGroup);
-
-    // Stylized Double-Loop Ear on sides
-    const earOuter = makeLoop([
-      new THREE.Vector3(side * 0.81, 0.32,  0.02),
-      new THREE.Vector3(side * 0.86, 0.18, -0.10),
-      new THREE.Vector3(side * 0.81, -0.04, -0.04),
-      new THREE.Vector3(side * 0.78, 0.14,  0.04)
-    ], faceLineMat, true);
-    root.add(earOuter);
-
-    // Internal Nasal Sinus Oval Rings (just like in reference image)
-    const sinus = makeLoop([
-      new THREE.Vector3(side * 0.11, 0.24, 0.65),
-      new THREE.Vector3(side * 0.16, 0.12, 0.72),
-      new THREE.Vector3(side * 0.10, 0.02, 0.66),
-      new THREE.Vector3(side * 0.06, 0.13, 0.60)
-    ], sinusLineMat, true);
-    root.add(sinus);
+    const sPts = [];
+    for (let k = 0; k <= 24; k++) {
+      const a = (k / 24) * Math.PI * 2;
+      sPts.push(new THREE.Vector3(
+        side * (0.14 + Math.cos(a) * 0.065),
+        0.16 + Math.sin(a) * 0.13,
+        0.74 + Math.cos(a) * 0.05
+      ));
+    }
+    root.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(sPts), sinusLineMat));
   });
 
-  // Geometric Nose Bridge & Nostril Wings
-  const noseBridge = makeLoop([
-    new THREE.Vector3(0, 0.34, 0.89),
-    new THREE.Vector3(0, 0.16, 1.03),
-    new THREE.Vector3(0, 0.03, 1.08),
-    new THREE.Vector3(0, -0.02, 0.94)
-  ], faceLineMat, false);
-  root.add(noseBridge);
+  // Concentric Wireframe Eyes & Arched Eyebrows
+  function createWireframeEye(side) {
+    const eyeGroup = new THREE.Group();
+    eyeGroup.position.set(side * 0.29, 0.38, 0.81);
+    eyeGroup.rotation.y = side * 0.20;
 
-  const noseBase = makeLoop([
-    new THREE.Vector3(-0.12, 0.01, 0.92),
-    new THREE.Vector3(-0.06, 0.04, 1.05),
-    new THREE.Vector3( 0.00, 0.03, 1.08),
-    new THREE.Vector3( 0.06, 0.04, 1.05),
-    new THREE.Vector3( 0.12, 0.01, 0.92)
-  ], faceLineMat, false);
-  root.add(noseBase);
-
-  // =========================================================================
-  // 3. BOLD CORAL-RED U-SHAPED ARTICULATED MANDIBLE (JAW)
-  // =========================================================================
-  const jawPivot = new THREE.Group();
-  jawPivot.position.set(0, 0.04, 0.06);
-  root.add(jawPivot);
-
-  const mandibleCurve = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(-0.54,  0.02, -0.06), // Left Condyle
-    new THREE.Vector3(-0.52, -0.05,  0.02), // Notch
-    new THREE.Vector3(-0.50,  0.01,  0.10), // Coronoid peak
-    new THREE.Vector3(-0.48, -0.34,  0.14), // Left Gonion (jaw angle)
-    new THREE.Vector3(-0.34, -0.52,  0.56),
-    new THREE.Vector3( 0.00, -0.58,  0.76), // Chin symphysis
-    new THREE.Vector3( 0.34, -0.52,  0.56),
-    new THREE.Vector3( 0.48, -0.34,  0.14), // Right Gonion
-    new THREE.Vector3( 0.50,  0.01,  0.10), // Coronoid peak
-    new THREE.Vector3( 0.52, -0.05,  0.02), // Notch
-    new THREE.Vector3( 0.54,  0.02, -0.06)  // Right Condyle
-  ]);
-  const mandibleTube = new THREE.Mesh(
-    new THREE.TubeGeometry(mandibleCurve, 64, 0.017, 8, false),
-    jawMat
-  );
-  jawPivot.add(mandibleTube);
-
-  // =========================================================================
-  // 4. INTERNAL STACKED-RING VOCAL TRACT + SOLAR YELLOW TONGUE + PINK LIPS
-  // =========================================================================
-  const TRACT_SLICES = 28;
-  const TRACT_SEGS = 24;
-
-  // Centerline from trachea/glottis -> pharynx -> palate -> oral cavity -> lips
-  const tractCurve = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(0, -1.45, -0.16), // Bottom trachea
-    new THREE.Vector3(0, -1.02, -0.14), // Glottis / Larynx
-    new THREE.Vector3(0, -0.56, -0.10), // Lower Pharynx
-    new THREE.Vector3(0, -0.22, -0.02), // Upper Pharynx / Velum bend
-    new THREE.Vector3(0, -0.14,  0.32), // Mid Oral Cavity
-    new THREE.Vector3(0, -0.16,  0.64), // Alveolar ridge
-    new THREE.Vector3(0, -0.18,  0.88)  // Lips exit
-  ]);
-  const tractFrames = tractCurve.computeFrenetFrames(TRACT_SLICES, false);
-
-  // Dynamic Vocal Tract Wireframe Geometry (Horizontal Rings + Vertical Ribs)
-  const ringVertCount = TRACT_SLICES * TRACT_SEGS * 2;
-  const ribVertCount = (TRACT_SLICES - 1) * TRACT_SEGS * 2;
-
-  const ringGeo = new THREE.BufferGeometry();
-  const ringPositions = new Float32Array(ringVertCount * 3);
-  ringGeo.setAttribute("position", new THREE.BufferAttribute(ringPositions, 3));
-  const tractRingsMesh = new THREE.LineSegments(ringGeo, tractRingMat);
-  root.add(tractRingsMesh);
-
-  const ribGeo = new THREE.BufferGeometry();
-  const ribPositions = new Float32Array(ribVertCount * 3);
-  ribGeo.setAttribute("position", new THREE.BufferAttribute(ribPositions, 3));
-  const tractRibsMesh = new THREE.LineSegments(ribGeo, tractRibMat);
-  root.add(tractRibsMesh);
-
-  // Solar Yellow Wireframe Tongue Dome inside Oral Cavity
-  const tongueLines = buildQuadGridLines(10, 16, (u, v) => {
-    const phi = u * Math.PI * 0.55;
-    const theta = v * Math.PI * 2;
-    return new THREE.Vector3(
-      Math.sin(phi) * Math.sin(theta) * 0.25,
-      Math.cos(phi) * 0.22 - 0.14,
-      Math.sin(phi) * Math.cos(theta) * 0.34
-    );
-  }, tongueWireMat);
-  const tongueBaseArr = Float32Array.from(tongueLines.geometry.attributes.position.array);
-  tongueLines.position.set(0, -0.18, 0.36);
-  root.add(tongueLines);
-
-  // Concentric Neon Pink Lip Aperture Rings at Mouth Exit
-  const lipGroup = new THREE.Group();
-  lipGroup.position.set(0, -0.18, 0.89);
-  root.add(lipGroup);
-
-  const lipRingOuter = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.015, 10, 32), lipMat);
-  const lipRingInner = new THREE.Mesh(new THREE.TorusGeometry(0.13, 0.011, 8, 28), lipMat);
-  lipRingInner.position.z = -0.02;
-  lipGroup.add(lipRingOuter, lipRingInner);
-
-  // Glowing Solar Yellow Glottis Ring in Throat
-  const glottisRing = new THREE.Mesh(new THREE.TorusGeometry(0.17, 0.022, 10, 28), glottisMat);
-  glottisRing.rotation.x = Math.PI / 2;
-  glottisRing.position.set(0, -1.02, -0.14);
-  root.add(glottisRing);
-
-  function updateVocalTractGeometry(state) {
-    const grid = [];
-    for (let i = 0; i < TRACT_SLICES; i++) {
-      const t = i / (TRACT_SLICES - 1);
-      const center = tractCurve.getPointAt(t);
-      const N = tractFrames.normals[i];
-      const B = tractFrames.binormals[i];
-
-      // Radius profile along vocal tract (trachea -> pharynx -> oral cavity -> lips)
-      let rx = 0.17;
-      let ry = 0.17;
-
-      if (t < 0.28) {
-        // Trachea & Glottis
-        rx = 0.16;
-        ry = 0.16;
-      } else if (t < 0.55) {
-        // Pharynx & Velum expansion
-        const vExp = state.velum_open * 0.06;
-        rx = 0.21 + vExp;
-        ry = 0.20 + vExp;
-      } else if (t < 0.88) {
-        // Oral cavity (widens with jaw_open)
-        rx = 0.25 + state.jaw_open * 0.04;
-        ry = 0.21 + state.jaw_open * 0.09;
-      } else {
-        // Lips exit
-        const roundScale = 1.0 - state.lip_round * 0.35;
-        rx = (0.19 + state.lip_open * 0.03) * roundScale;
-        ry = 0.09 + state.lip_open * 0.13;
+    [0.135, 0.095, 0.055, 0.022].forEach((r, idx) => {
+      const pts = [];
+      for (let k = 0; k <= 28; k++) {
+        const a = (k / 28) * Math.PI * 2;
+        pts.push(new THREE.Vector3(Math.cos(a) * r * 1.15, Math.sin(a) * r * 0.82, idx * 0.012));
       }
+      eyeGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), featureLineMat));
+    });
 
-      const slicePts = [];
-      for (let j = 0; j < TRACT_SEGS; j++) {
-        const ang = (j / TRACT_SEGS) * Math.PI * 2;
-        const cosA = Math.cos(ang);
-        const sinA = Math.sin(ang);
-
-        // Tongue constriction indentation on bottom of oral cavity
-        let localRy = ry;
-        if (t > 0.48 && t < 0.86 && sinA < 0) {
-          const tongueDist = Math.abs((t - 0.48) / 0.38 - state.tongue_x);
-          const bulge = Math.exp(-Math.pow(tongueDist / 0.24, 2)) * state.tongue_y * 0.13;
-          localRy = Math.max(0.05, ry - bulge);
-        }
-
-        const px = center.x + B.x * (cosA * rx) + N.x * (sinA * localRy);
-        const py = center.y + B.y * (cosA * rx) + N.y * (sinA * localRy);
-        const pz = center.z + B.z * (cosA * rx) + N.z * (sinA * localRy);
-        slicePts.push({ x: px, y: py, z: pz });
-      }
-      grid.push(slicePts);
+    // Arched Wireframe Eyebrow
+    const browPts = [];
+    for (let k = 0; k <= 16; k++) {
+      const t = (k / 16) * 2 - 1;
+      browPts.push(new THREE.Vector3(
+        t * 0.16,
+        0.16 + (1 - t * t) * 0.045,
+        0.03 - Math.abs(t) * 0.03
+      ));
     }
+    const browLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(browPts), featureLineMat);
+    eyeGroup.add(browLine);
 
-    let rIdx = 0;
-    for (let i = 0; i < TRACT_SLICES; i++) {
-      for (let j = 0; j < TRACT_SEGS; j++) {
-        const a = grid[i][j];
-        const b = grid[i][(j + 1) % TRACT_SEGS];
-        ringPositions[rIdx++] = a.x; ringPositions[rIdx++] = a.y; ringPositions[rIdx++] = a.z;
-        ringPositions[rIdx++] = b.x; ringPositions[rIdx++] = b.y; ringPositions[rIdx++] = b.z;
-      }
-    }
-    ringGeo.attributes.position.needsUpdate = true;
-
-    let bIdx = 0;
-    for (let i = 0; i < TRACT_SLICES - 1; i++) {
-      for (let j = 0; j < TRACT_SEGS; j++) {
-        const a = grid[i][j];
-        const b = grid[i + 1][j];
-        ribPositions[bIdx++] = a.x; ribPositions[bIdx++] = a.y; ribPositions[bIdx++] = a.z;
-        ribPositions[bIdx++] = b.x; ribPositions[bIdx++] = b.y; ribPositions[bIdx++] = b.z;
-      }
-    }
-    ribGeo.attributes.position.needsUpdate = true;
+    root.add(eyeGroup);
+    return { eyeGroup, browLine };
   }
 
-  function updateFloatingIpaPosition(state) {
-    const el = document.getElementById("floatingIpa");
-    if (!el) return;
-    const v = new THREE.Vector3(0.24, -0.18, 0.94);
+  const leftEye = createWireframeEye(1);
+  const rightEye = createWireframeEye(-1);
+
+  // Wireframe Ears
+  [-1, 1].forEach(side => {
+    const earPts = [];
+    for (let k = 0; k <= 28; k++) {
+      const a = -Math.PI * 0.65 + (k / 28) * Math.PI * 1.45;
+      earPts.push(new THREE.Vector3(
+        side * (0.79 + Math.cos(a) * 0.03),
+        0.22 + Math.sin(a) * 0.21,
+        -0.06 + Math.cos(a) * 0.11
+      ));
+    }
+    root.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(earPts), featureLineMat));
+  });
+
+  // =========================================================================
+  // 3. ARTICULATED U-SHAPED WIREFRAME MANDIBLE (JAW CONTOUR)
+  // =========================================================================
+  const jawPivot = new THREE.Group();
+  jawPivot.position.set(0, 0.04, 0.14);
+
+  const jawCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(-0.46,  0.04, -0.02),
+    new THREE.Vector3(-0.44, -0.26,  0.04),
+    new THREE.Vector3(-0.34, -0.46,  0.34),
+    new THREE.Vector3(-0.16, -0.54,  0.64),
+    new THREE.Vector3( 0.00, -0.56,  0.72),
+    new THREE.Vector3( 0.16, -0.54,  0.64),
+    new THREE.Vector3( 0.34, -0.46,  0.34),
+    new THREE.Vector3( 0.44, -0.26,  0.04),
+    new THREE.Vector3( 0.46,  0.04, -0.02)
+  ]);
+  const jawTube = new THREE.Mesh(new THREE.TubeGeometry(jawCurve, 44, 0.024, 8, false), jawContourMat);
+  jawPivot.add(jawTube);
+
+  const jawOutline = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints(jawCurve.getPoints(64)),
+    jawLineMat
+  );
+  jawPivot.add(jawOutline);
+  root.add(jawPivot);
+
+  // =========================================================================
+  // 4. INTERNAL VOCAL TRACT TUBE, TRACHEA RINGS, TONGUE GRID & LIP RINGS
+  // =========================================================================
+  // Trachea & Glottis Stack inside Neck
+  const glottisGroup = new THREE.Group();
+  glottisGroup.position.set(0, -1.08, 0.02);
+  for (let r = 0; r < 7; r++) {
+    const pts = [];
+    const radius = 0.16 + (r / 7) * 0.04;
+    for (let k = 0; k <= 28; k++) {
+      const a = (k / 28) * Math.PI * 2;
+      pts.push(new THREE.Vector3(Math.cos(a) * radius, r * 0.085, Math.sin(a) * radius * 0.9));
+    }
+    glottisGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), tractRingMat));
+  }
+  root.add(glottisGroup);
+
+  // Curved Pharynx-to-Oral Vocal Tract Wireframe Tunnel
+  const tractCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(0, -0.48, 0.02),
+    new THREE.Vector3(0, -0.24, 0.06),
+    new THREE.Vector3(0, -0.06, 0.24),
+    new THREE.Vector3(0, -0.08, 0.54),
+    new THREE.Vector3(0, -0.16, 0.84)
+  ]);
+  const vocalTractMesh = new THREE.Mesh(
+    new THREE.TubeGeometry(tractCurve, 22, 0.21, 18, false),
+    tractWireMat
+  );
+  root.add(vocalTractMesh);
+
+  // Hard Palate Anchor for CAD Pin
+  const palate = new THREE.Object3D();
+  palate.position.set(0, 0.08, 0.48);
+  root.add(palate);
+
+  // Soft Palate (Velum) Wireframe Flap
+  const velumPivot = new THREE.Group();
+  velumPivot.position.set(0, 0.04, 0.18);
+  const velumMesh = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.03, 0.24, 4, 1, 4), jawContourMat);
+  velumMesh.position.set(0, -0.02, -0.10);
+  velumPivot.add(velumMesh);
+  root.add(velumPivot);
+
+  // Articulated Ribbed Tongue Grid inside Oral Cavity
+  const tongueGeo = new THREE.CylinderGeometry(0.16, 0.19, 0.56, 16, 12, false);
+  tongueGeo.rotateX(Math.PI / 2);
+  const tongueBasePos = Float32Array.from(tongueGeo.attributes.position.array);
+  const tongueMesh = new THREE.Mesh(tongueGeo, tongueWireMat);
+  tongueMesh.position.set(0, -0.18, 0.44);
+  root.add(tongueMesh);
+
+  // Concentric Wireframe Lip Rings (Upper & Lower Lip Aperture)
+  const lipGroup = new THREE.Group();
+  lipGroup.position.set(0, -0.17, 0.88);
+  root.add(lipGroup);
+
+  const upperLip = new THREE.Object3D();
+  upperLip.position.set(0, 0.05, 0);
+  lipGroup.add(upperLip);
+
+  const lipRings = [];
+  [1.0, 0.78, 0.56].forEach((scaleFactor, idx) => {
+    const pts = [];
+    for (let k = 0; k <= 36; k++) {
+      const a = (k / 36) * Math.PI * 2;
+      pts.push(new THREE.Vector3(
+        Math.cos(a) * 0.21 * scaleFactor,
+        Math.sin(a) * 0.11 * scaleFactor,
+        idx * 0.018
+      ));
+    }
+    const ring = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), lipRingMat);
+    lipGroup.add(ring);
+    lipRings.push(ring);
+  });
+
+  // Acoustic Wave Rings radiating from Wireframe Lips
+  const waveRings = [];
+  for (let w = 0; w < 3; w++) {
+    const wr = new THREE.Mesh(new THREE.RingGeometry(0.15, 0.17, 28), waveRingMat.clone());
+    wr.position.set(0, -0.17, 0.94);
+    root.add(wr);
+    waveRings.push(wr);
+  }
+
+  function projectToScreen(obj3D) {
+    const v = new THREE.Vector3();
+    obj3D.getWorldPosition(v);
     v.project(camera);
-    const sx = (v.x * 0.5 + 0.5) * window.innerWidth;
-    const sy = (-v.y * 0.5 + 0.5) * window.innerHeight;
-    el.style.left = `${sx.toFixed(1)}px`;
-    el.style.top = `${sy.toFixed(1)}px`;
-    el.textContent = state.phoneme === "sil" ? "" : state.phoneme;
+    return {
+      x: (v.x * 0.5 + 0.5) * window.innerWidth,
+      y: (-v.y * 0.5 + 0.5) * window.innerHeight
+    };
+  }
+
+  function updateCadPins() {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    if (w < 960) return;
+
+    const pins = [
+      { obj: palate, el: "pinPalate", tx: w * 0.37, ty: h * 0.24 },
+      { obj: upperLip, el: "pinLip", tx: w * 0.62, ty: h * 0.36 },
+      { obj: tongueMesh, el: "pinTongue", tx: w * 0.63, ty: h * 0.55 },
+      { obj: glottisGroup, el: "pinGlottis", tx: w * 0.38, ty: h * 0.73 }
+    ];
+
+    for (const p of pins) {
+      const s = projectToScreen(p.obj);
+      const line = document.getElementById(p.el + "Line");
+      const dot = document.getElementById(p.el + "Dot");
+      const box = document.getElementById(p.el + "Box");
+      if (!line || !dot || !box) continue;
+
+      const elbowX = p.tx > s.x ? p.tx - 24 : p.tx + 24;
+      line.setAttribute("points", `${s.x.toFixed(1)},${s.y.toFixed(1)} ${elbowX.toFixed(1)},${p.ty.toFixed(1)} ${p.tx.toFixed(1)},${p.ty.toFixed(1)}`);
+      dot.setAttribute("cx", s.x.toFixed(1));
+      dot.setAttribute("cy", s.y.toFixed(1));
+      box.setAttribute("transform", `translate(${p.tx.toFixed(1)}, ${p.ty.toFixed(1)})`);
+    }
   }
 
   function updateKinematics(state, timeMs) {
-    // Swing red mandible down when jaw opens
-    jawPivot.rotation.x = state.jaw_open * 0.30;
+    // U-shaped Jaw rotation
+    jawPivot.rotation.x = state.jaw_open * 0.28;
+    velumPivot.rotation.x = -state.velum_open * 0.50;
 
-    // Deform Solar Yellow tongue wireframe dome
-    const tAttr = tongueLines.geometry.attributes.position;
-    const tx = (state.tongue_x - 0.5) * 0.22;
-    const ty = (state.tongue_y - 0.25) * 0.20;
-    for (let i = 0; i < tAttr.count; i++) {
-      const bx = tongueBaseArr[i * 3];
-      const by = tongueBaseArr[i * 3 + 1];
-      const bz = tongueBaseArr[i * 3 + 2];
-      const lift = Math.max(0, by + 0.14) / 0.22;
-      tAttr.setXYZ(i, bx, by + lift * ty - state.jaw_open * 0.04, bz + lift * tx);
+    // Tongue grid articulation (forward/back + dorsal arch)
+    const pos = tongueGeo.attributes.position;
+    const tx = (state.tongue_x - 0.5) * 0.24;
+    const ty = (state.tongue_y - 0.25) * 0.22;
+    for (let i = 0; i < pos.count; i++) {
+      const bx = tongueBasePos[i * 3];
+      const by = tongueBasePos[i * 3 + 1];
+      const bz = tongueBasePos[i * 3 + 2];
+      const arch = Math.cos((bz / 0.30) * (Math.PI * 0.45));
+      const topMask = Math.max(0, by + 0.08);
+      pos.setXYZ(
+        i,
+        bx * 0.92,
+        by * 0.65 + topMask * ty * arch * 1.4,
+        bz + tx * arch
+      );
     }
-    tAttr.needsUpdate = true;
+    pos.needsUpdate = true;
 
-    // Deform Pink Lip Rings
-    const roundScale = 1.0 - state.lip_round * 0.36;
-    const openScaleY = 0.55 + state.lip_open * 0.85;
-    const protrude = state.lip_round * 0.08;
-    lipGroup.position.set(0, -0.18 - state.jaw_open * 0.03, 0.89 + protrude);
-    lipGroup.scale.set(roundScale, openScaleY, 1.0);
+    // Concentric Wireframe Lip Rings opening & rounding
+    const openScaleY = 0.45 + state.lip_open * 1.15;
+    const roundScaleX = 1.05 - state.lip_round * 0.38;
+    const protrudeZ = 0.88 + state.lip_round * 0.10;
+    lipGroup.position.set(0, -0.17 - state.jaw_open * 0.03, protrudeZ);
+    lipGroup.scale.set(roundScaleX, openScaleY, 1.0);
 
-    // Subtle eye gaze
-    const gx = Math.sin(timeMs * 0.0009) * 0.018;
-    const gy = Math.cos(timeMs * 0.0007) * 0.010;
-    leftPupilGroup.position.set(0.31 + gx, 0.34 + gy, 0.875);
-    rightPupilGroup.position.set(-0.31 + gx, 0.34 + gy, 0.875);
+    // Subtle eye blink & gaze
+    const blinkCycle = (timeMs % 3800) / 3800;
+    const blinkScale = blinkCycle > 0.95
+      ? Math.max(0.12, Math.abs(Math.cos(((blinkCycle - 0.95) / 0.05) * Math.PI)))
+      : 1.0;
+    leftEye.eyeGroup.scale.y = blinkScale;
+    rightEye.eyeGroup.scale.y = blinkScale;
 
-    // Glottis vibration
-    const vib = 1.0 + state.glottis_voicing * 0.25 * Math.sin(timeMs * 0.09);
-    glottisRing.scale.set(vib, vib, 1.0);
+    // Trachea/Glottis vibration & acoustic rings
+    const vib = 1.0 + state.glottis_voicing * 0.12 * Math.sin(timeMs * 0.08);
+    glottisGroup.scale.set(vib, 1.0, vib);
 
-    updateVocalTractGeometry(state);
-    updateFloatingIpaPosition(state);
+    waveRings.forEach((wr, idx) => {
+      if (state.glottis_voicing > 0.06) {
+        const cycle = ((timeMs * 0.0018 + idx * 0.33) % 1.0);
+        const sc = 0.65 + cycle * 2.3;
+        wr.scale.set(sc, sc, 1.0);
+        wr.position.z = protrudeZ + 0.05 + cycle * 0.85;
+        wr.material.opacity = (1.0 - cycle) * 0.52 * state.glottis_voicing;
+      } else {
+        wr.material.opacity = 0.0;
+      }
+    });
   }
 
   const sCanvas = document.getElementById("spectrumCanvas");
@@ -497,6 +493,7 @@ window.AgHead3D = (() => {
       controls.update();
       onTick(now);
       updateKinematics(window.AgSynth.state, now);
+      updateCadPins();
       renderer.render(scene, camera);
       drawSpectrum(window.AgSynth.getAnalyser());
       requestAnimationFrame(frame);
