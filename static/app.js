@@ -76,71 +76,85 @@ window.AgApp = (() => {
 
   async function runTranslation(andSpeak = false, forceSlow = false) {
     const text = document.getElementById("trInput").value;
-    const res = await fetch("/api/v1/translate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text })
-    });
-    const data = await res.json();
-    lastTranslatedItems = data.items || [];
+    let gunesText = document.getElementById("gunesOutput").textContent.trim();
 
-    document.getElementById("gunesOutput").textContent = data.gunes_text;
-    document.getElementById("trMeta").textContent = `${data.word_count} KELİME • ${data.elapsed_ms} MS`;
+    try {
+      const res = await fetch("/api/v1/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        lastTranslatedItems = data.items || [];
+        gunesText = data.gunes_text;
+        document.getElementById("gunesOutput").textContent = gunesText;
+        document.getElementById("trMeta").textContent = `${data.word_count} KELİME • ${data.elapsed_ms} MS`;
 
-    const list = document.getElementById("morphList");
-    list.innerHTML = "";
-    for (const item of lastTranslatedItems) {
-      const div = document.createElement("div");
-      div.className = "morph-item";
-      const sufHtml = item.suffixes.join("");
-      const badgesHtml = [
-        item.root_gunes ? `<span class="badge">Kök: ${item.root_gunes}</span>` : "",
-        ...item.suffix_details.map(s => `<span class="badge">${s.code}: ${s.role}</span>`),
-        `<span class="badge">Z₅₃:${item.koma_slot}</span>`
-      ].join("");
+        const list = document.getElementById("morphList");
+        list.innerHTML = "";
+        for (const item of lastTranslatedItems) {
+          const div = document.createElement("div");
+          div.className = "morph-item";
+          const sufHtml = item.suffixes.join("");
+          const badgesHtml = [
+            item.root_gunes ? `<span class="badge">Kök: ${item.root_gunes}</span>` : "",
+            ...item.suffix_details.map(s => `<span class="badge">${s.code}: ${s.role}</span>`),
+            `<span class="badge">Z₅₃:${item.koma_slot}</span>`
+          ].join("");
 
-      div.innerHTML = `
-        <div class="morph-top">
-          <span class="morph-src">${item.source}</span>
-          <span class="morph-dst"><span class="root">${item.root_gunes}</span><span class="suf">${sufHtml}</span></span>
-        </div>
-        <div class="badges">${badgesHtml}</div>
-      `;
-      list.appendChild(div);
+          div.innerHTML = `
+            <div class="morph-top">
+              <span class="morph-src">${item.source}</span>
+              <span class="morph-dst"><span class="root">${item.root_gunes}</span><span class="suf">${sufHtml}</span></span>
+            </div>
+            <div class="badges">${badgesHtml}</div>
+          `;
+          list.appendChild(div);
+        }
+      }
+    } catch (err) {
+      console.warn("Translate fallback:", err);
     }
 
-    if (andSpeak && data.gunes_text) {
-      await window.AgSynth.speak(data.gunes_text, lastTranslatedItems, forceSlow);
+    if (andSpeak && gunesText) {
+      await window.AgSynth.speak(gunesText, lastTranslatedItems, forceSlow);
     }
   }
 
   async function runDecode(andSpeak = false, forceSlow = false) {
     const text = document.getElementById("gunesInput").value;
-    const res = await fetch("/api/v1/decode", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text })
-    });
-    const data = await res.json();
-    lastDecodedResults = data.results || [];
+    try {
+      const res = await fetch("/api/v1/decode", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        lastDecodedResults = data.results || [];
 
-    const list = document.getElementById("decodeList");
-    list.innerHTML = "";
-    for (const r of lastDecodedResults) {
-      const div = document.createElement("div");
-      div.className = "morph-item";
-      const slotBadges = r.slots.map(s => `<span class="badge">${s.code} → ${s.role}</span>`).join("");
-      div.innerHTML = `
-        <div class="morph-top">
-          <span class="morph-dst"><span class="root">${r.segmented}</span></span>
-          <span style="color:var(--accent);font-weight:700;">≈ ${r.tr_reconstructed}</span>
-        </div>
-        <div class="badges">
-          <span class="badge">Kök (${r.root_pos}): ${r.root_tr}</span>
-          ${slotBadges}
-        </div>
-      `;
-      list.appendChild(div);
+        const list = document.getElementById("decodeList");
+        list.innerHTML = "";
+        for (const r of lastDecodedResults) {
+          const div = document.createElement("div");
+          div.className = "morph-item";
+          const slotBadges = r.slots.map(s => `<span class="badge">${s.code} → ${s.role}</span>`).join("");
+          div.innerHTML = `
+            <div class="morph-top">
+              <span class="morph-dst"><span class="root">${r.segmented}</span></span>
+              <span style="color:var(--accent);font-weight:700;">≈ ${r.tr_reconstructed}</span>
+            </div>
+            <div class="badges">
+              <span class="badge">Kök (${r.root_pos}): ${r.root_tr}</span>
+              ${slotBadges}
+            </div>
+          `;
+          list.appendChild(div);
+        }
+      }
+    } catch (err) {
+      console.warn("Decode fallback:", err);
     }
 
     if (andSpeak && text.trim()) {
@@ -164,24 +178,28 @@ window.AgApp = (() => {
     log.appendChild(userDiv);
     log.scrollTop = log.scrollHeight;
 
-    const res = await fetch("/api/v1/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: msg, voice_id: document.getElementById("voiceSelect").value })
-    });
-    const data = await res.json();
-    document.getElementById("chatEngineBadge").textContent = data.ai_engine;
+    try {
+      const res = await fetch("/api/v1/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg, voice_id: document.getElementById("voiceSelect").value })
+      });
+      const data = await res.json();
+      document.getElementById("chatEngineBadge").textContent = data.ai_engine;
 
-    const botDiv = document.createElement("div");
-    botDiv.className = "chat-msg bot";
-    botDiv.innerHTML = `
-      <div class="g-line">☀️ ${data.gunes_text}</div>
-      <div class="tr-line">🇹🇷 ${data.reply_tr}</div>
-    `;
-    log.appendChild(botDiv);
-    log.scrollTop = log.scrollHeight;
+      const botDiv = document.createElement("div");
+      botDiv.className = "chat-msg bot";
+      botDiv.innerHTML = `
+        <div class="g-line">☀️ ${data.gunes_text}</div>
+        <div class="tr-line">🇹🇷 ${data.reply_tr}</div>
+      `;
+      log.appendChild(botDiv);
+      log.scrollTop = log.scrollHeight;
 
-    await window.AgSynth.speak(data.gunes_text, data.items || [], false);
+      await window.AgSynth.speak(data.gunes_text, data.items || [], false);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   function switchTab(activeTabId, activePaneId) {

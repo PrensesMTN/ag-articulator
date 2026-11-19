@@ -2,6 +2,7 @@ window.AgSynth = (() => {
   let audioCtx = null;
   let analyser = null;
   let currentAudioEl = null;
+  let currentBlobUrl = null;
   let activeSynthNodes = null;
   let activeVisemes = [];
   let playMode = "none";
@@ -52,14 +53,24 @@ window.AgSynth = (() => {
     return s.replace(/İ/g, "i").replace(/I/g, "ı").toLowerCase();
   }
 
-  function ensureAudioAnalyser() {
+  function unlockAudio() {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      audioCtx = new AudioContextClass();
       analyser = audioCtx.createAnalyser();
       analyser.fftSize = 1024;
       analyser.smoothingTimeConstant = 0.72;
     }
-    if (audioCtx.state === "suspended") audioCtx.resume();
+    if (audioCtx.state !== "running") {
+      audioCtx.resume().catch(() => {});
+    }
+    try {
+      const silentBuf = audioCtx.createBuffer(1, 1, audioCtx.sampleRate);
+      const src = audioCtx.createBufferSource();
+      src.buffer = silentBuf;
+      src.connect(audioCtx.destination);
+      src.start(0);
+    } catch (_) {}
   }
 
   function stopSpeech(label = "DURDURULDU") {
@@ -67,6 +78,10 @@ window.AgSynth = (() => {
     if (currentAudioEl) {
       try { currentAudioEl.pause(); currentAudioEl.src = ""; } catch (_) {}
       currentAudioEl = null;
+    }
+    if (currentBlobUrl) {
+      try { URL.revokeObjectURL(currentBlobUrl); } catch (_) {}
+      currentBlobUrl = null;
     }
     if (activeSynthNodes) {
       try {
@@ -174,8 +189,10 @@ window.AgSynth = (() => {
 
   async function speakFormant(gunesText, metaItems, voiceId, slowMode = false) {
     stopSpeech(slowMode ? "YAVAŞ SENTEZ..." : "53-KOMA SENTEZ...");
-    ensureAudioAnalyser();
-    await audioCtx.resume();
+    unlockAudio();
+    if (audioCtx.state !== "running") {
+      await audioCtx.resume();
+    }
 
     const { timeline, totalDur } = buildSynthTimeline(gunesText, metaItems, slowMode);
     if (!timeline.length) return;
@@ -275,7 +292,7 @@ window.AgSynth = (() => {
     compressor.release.setValueAtTime(0.07, now);
 
     const masterGain = audioCtx.createGain();
-    masterGain.gain.setValueAtTime(0.55, now);
+    masterGain.gain.setValueAtTime(0.62, now);
 
     f1Filter.connect(f1Gain); f1Gain.connect(clarityShelf);
     f2Filter.connect(f2Gain); f2Gain.connect(clarityShelf);
@@ -319,6 +336,7 @@ window.AgSynth = (() => {
 
   async function speakNeuralAI(gunesText, voiceId, slowMode = false) {
     stopSpeech(slowMode ? "AI YAVAŞ..." : "AI ÜRETİYOR...");
+    unlockAudio();
     try {
       const res = await fetch("/api/v1/tts", {
         method: "POST",
@@ -328,27 +346,35 @@ window.AgSynth = (() => {
       if (!res.ok) throw new Error("TTS API Hatası");
       const data = await res.json();
 
-      ensureAudioAnalyser();
       const rate = slowMode ? 0.65 : 1.0;
       activeVisemes = (data.visemes || []).map(v => ({
         ...v, start_s: v.start_s / rate, end_s: v.end_s / rate
       }));
 
-      const audio = new Audio(`data:${data.mime_type};base64,${data.audio_base64}`);
+      const binStr = atob(data.audio_base64);
+      const bytes = new Uint8Array(binStr.length);
+      for (let i = 0; i < binStr.length; i++) bytes[i] = binStr.charCodeAt(i);
+      const blob = new Blob([bytes], { type: data.mime_type || "audio/mpeg" });
+      currentBlobUrl = URL.createObjectURL(blob);
+
+      const audio = new Audio(currentBlobUrl);
       audio.playbackRate = rate;
-      const sourceNode = audioCtx.createMediaElementSource(audio);
-      sourceNode.connect(analyser);
-      analyser.connect(audioCtx.destination);
+
+      try {
+        const sourceNode = audioCtx.createMediaElementSource(audio);
+        sourceNode.connect(analyser);
+        analyser.connect(audioCtx.destination);
+      } catch (_) {}
 
       currentAudioEl = audio;
       playMode = "ai";
       if (window.AgApp) window.AgApp.setStatus(slowMode ? "AI YAVAŞ" : "AI KONUŞUYOR");
 
       audio.onended = () => stopSpeech("TAMAMLANDI");
-      audio.onerror = () => stopSpeech("SES HATASI");
+      audio.onerror = () => speakFormant(gunesText, [], "synth_koma", slowMode);
       await audio.play();
     } catch (err) {
-      console.error(err);
+      console.warn("AI TTS fallback to Formant Synth:", err);
       await speakFormant(gunesText, [], "synth_koma", slowMode);
     }
   }
@@ -401,7 +427,7 @@ window.AgSynth = (() => {
       state.pitch_hz = Math.round(state.base_f0 * Math.pow(2.0, target.koma_node / 53.0) * 10) / 10;
       if (target.f1) { state.f1 = target.f1; state.f2 = target.f2; state.f3 = target.f3; }
 
-      const energyGain = playMode === "synth" ? 0.95 : (0.35 + rms * 0.85);
+      const energyGain = playMode === "synth" ? 0.95 : (0.45 + rms * 0.85);
       state.jaw_open += ((target.jaw_open * energyGain) - state.jaw_open) * 0.36;
       state.tongue_x += (target.tongue_x - state.tongue_x) * 0.34;
       state.tongue_y += (target.tongue_y - state.tongue_y) * 0.34;
@@ -412,7 +438,7 @@ window.AgSynth = (() => {
       state.jaw_open += ((0.22 + rms * 0.75) - state.jaw_open) * 0.25;
       state.lip_open += ((0.18 + rms * 0.85) - state.lip_open) * 0.25;
     }
-    state.glottis_voicing = rms;
+    state.glottis_voicing = playMode === "ai" ? Math.max(rms, 0.38) : rms;
   }
 
   function setBaseF0(val) {
@@ -426,7 +452,7 @@ window.AgSynth = (() => {
   }
 
   return {
-    unlockAudio: ensureAudioAnalyser,
+    unlockAudio,
     state,
     speak,
     stopSpeech,
