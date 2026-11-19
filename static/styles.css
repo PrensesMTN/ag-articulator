@@ -554,3 +554,130 @@ input[type="range"] { width: 100%; accent-color: var(--yellow); cursor: pointer;
   font-size: 10px;
 }
 .bottom-hud-pill .meta-col strong { color: var(--purple-bright); }
+
+/* ============================================================================
+   TABLET & MOBILE RESPONSIVE LAYOUT (<= 1024px)
+   ============================================================================ */
+@media (max-width: 1024px) {
+  body {
+    height: auto;
+    min-height: 100dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  #cadOverlay {
+    display: none;
+  }
+
+  .top-bar {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    order: 1;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .hero-title {
+    font-size: 21px;
+  }
+
+  .top-right-cluster {
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .clock-line {
+    display: none;
+  }
+
+  .controls-pill {
+    width: 100%;
+    justify-content: space-between;
+    border-radius: 12px;
+    padding: 6px 8px;
+  }
+
+  .controls-pill select.hud-select:first-child {
+    flex: 1;
+    min-width: 0;
+  }
+
+  #stageWrap {
+    position: relative;
+    inset: auto;
+    order: 2;
+    width: 100%;
+    height: 330px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: radial-gradient(circle at 50% 45%, rgba(147, 51, 234, 0.14), rgba(7, 5, 16, 0.85));
+    box-shadow: var(--glow-purple);
+    overflow: hidden;
+  }
+
+  #threeContainer {
+    touch-action: none;
+  }
+
+  .bottom-hud-pill {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    transform: none;
+    order: 3;
+    width: 100%;
+    border-radius: 14px;
+    justify-content: center;
+    padding: 9px 14px;
+  }
+
+  .hud-deck {
+    position: relative;
+    top: auto;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    width: 100%;
+    pointer-events: auto;
+  }
+
+  .left-deck {
+    order: 4;
+  }
+
+  .right-deck {
+    order: 5;
+    padding-bottom: 16px;
+  }
+
+  .dossier-card.grow {
+    flex: none;
+  }
+
+  textarea,
+  .chat-input-row input {
+    font-size: 16px;
+  }
+
+  .btn-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+  }
+
+  button.action {
+    padding: 10px 8px;
+    font-size: 11px;
+  }
+
+  .morph-list,
+  .chat-log {
+    max-height: 240px;
+  }
+}

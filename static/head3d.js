@@ -1,11 +1,14 @@
 window.AgHead3D = (() => {
   const container = document.getElementById("threeContainer");
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(32, window.innerWidth / window.innerHeight, 0.1, 100);
+  const getStageW = () => container.clientWidth || window.innerWidth;
+  const getStageH = () => container.clientHeight || window.innerHeight;
+  const camera = new THREE.PerspectiveCamera(32, getStageW() / getStageH(), 0.1, 100);
   camera.position.set(3.2, 0.05, 4.4);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(getStageW(), getStageH());
+  if (getStageW() < 768) camera.position.set(2.5, 0.02, 4.9);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   container.appendChild(renderer.domElement);
 
@@ -654,12 +657,13 @@ window.AgHead3D = (() => {
   window.addEventListener("resize", () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(getStageW(), getStageH());
+  if (getStageW() < 768) camera.position.set(2.5, 0.02, 4.9);
     resizeSpectrum();
   });
 
   function startLoop(onTick) {
-    resizeSpectrum();
+    handleResize();
     function frame(now) {
       controls.update();
       onTick(now);
