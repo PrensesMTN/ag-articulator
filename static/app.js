@@ -216,6 +216,13 @@ window.AgApp = (() => {
   }
 
   function bindEvents() {
+    const ecoBtn = document.getElementById("ecoToggleBtn");
+    const ecoFooter = document.getElementById("ecosystemFooter");
+    if (ecoBtn && ecoFooter) {
+      ecoBtn.addEventListener("click", () => {
+        ecoFooter.classList.toggle("expanded");
+      });
+    }
     document.getElementById("tabTrToGunes").addEventListener("click", () => switchTab("tabTrToGunes", "paneTrToGunes"));
     document.getElementById("tabGunesToTr").addEventListener("click", () => {
       switchTab("tabGunesToTr", "paneGunesToTr");

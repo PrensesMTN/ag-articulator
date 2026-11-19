@@ -759,44 +759,105 @@ input[type="range"] { width: 100%; accent-color: var(--yellow); cursor: pointer;
 }
 
 
+
+
 /* ============================================================================
-   DEDICATION FOOTER (pCwOrM)
+   GÜNEŞ DİLİ EKOSİSTEMİ & LİSANS FOOTER
    ============================================================================ */
-.dedication-footer {
+.ecosystem-footer {
   position: fixed;
-  bottom: 4px;
+  bottom: 6px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 8;
+  z-index: 12;
+  width: min(94vw, 1140px);
+  background: rgba(11, 8, 22, 0.90);
+  border: 1px solid rgba(168, 85, 247, 0.32);
+  border-radius: 12px;
+  backdrop-filter: blur(20px) saturate(140%);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.65);
   font-family: 'JetBrains Mono', monospace;
-  font-size: 9.5px;
-  letter-spacing: 0.06em;
   color: var(--muted);
-  white-space: nowrap;
-  pointer-events: auto;
+  overflow: hidden;
 }
-.dedication-footer a {
+.eco-compact-bar {
+  padding: 5px 14px;
+  font-size: 9.5px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+}
+.eco-compact-bar strong { color: var(--text); }
+.eco-compact-bar a,
+.eco-full-dossier a {
   color: var(--yellow);
   text-decoration: none;
   border-bottom: 1px dotted rgba(250, 204, 21, 0.45);
-  transition: color 0.15s ease, border-color 0.15s ease;
 }
-.dedication-footer a:hover {
+.eco-compact-bar a:hover,
+.eco-full-dossier a:hover {
   color: var(--purple-bright);
-  border-bottom-color: var(--purple-bright);
 }
+.eco-sep { color: rgba(168, 85, 247, 0.55); }
+.eco-expand-tag {
+  color: var(--yellow);
+  font-weight: 700;
+  margin-left: 4px;
+}
+.eco-full-dossier {
+  display: none;
+  padding: 10px 14px 12px;
+  border-top: 1px solid rgba(168, 85, 247, 0.22);
+  font-size: 10px;
+  line-height: 1.55;
+  background: rgba(7, 5, 16, 0.95);
+}
+.ecosystem-footer.expanded .eco-full-dossier {
+  display: block;
+}
+.eco-quote {
+  color: var(--yellow);
+  font-style: italic;
+  margin-bottom: 8px;
+  padding-bottom: 7px;
+  border-bottom: 1px dashed rgba(250, 204, 21, 0.25);
+  text-align: center;
+}
+.eco-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.eco-grid strong { color: var(--purple-bright); }
+
 .bottom-hud-pill {
-  bottom: 24px;
+  bottom: 42px;
 }
+
 @media (max-width: 1024px) {
-  .dedication-footer {
+  .ecosystem-footer {
     position: relative;
     bottom: auto;
     left: auto;
     transform: none;
     order: 6;
-    text-align: center;
-    padding: 8px 0 4px;
+    width: 100%;
+    margin-top: 4px;
+  }
+  .eco-compact-bar {
+    display: none;
+  }
+  .eco-full-dossier {
+    display: block;
+    border-top: none;
     font-size: 10px;
+  }
+  .eco-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
   }
 }
