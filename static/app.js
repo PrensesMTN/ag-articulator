@@ -17,35 +17,21 @@ window.AgApp = (() => {
   function updateHUD() {
     const s = window.AgSynth.state;
     document.getElementById("hudPhoneme").textContent = `/${s.phoneme}/`;
-    document.getElementById("hudToken").textContent = `HECE: ${s.token}`;
+    document.getElementById("hudToken").textContent = `HECE: ${s.token} • Z₅₃:${s.koma_node}/53`;
     document.getElementById("hudFormants").textContent =
       `F₀: ${s.pitch_hz.toFixed(1)}Hz • F₁: ${Math.round(s.f1)} • F₂: ${Math.round(s.f2)} • F₃: ${Math.round(s.f3)}`;
 
-    const cadF0 = document.getElementById("cadGlottisVal");
-    const cadTongue = document.getElementById("cadTongueVal");
-    const cadLip = document.getElementById("cadLipVal");
-    if (cadF0) cadF0.textContent = `${s.pitch_hz.toFixed(1)} Hz`;
-    if (cadTongue) cadTongue.textContent = `X:${s.tongue_x.toFixed(2)} Y:${s.tongue_y.toFixed(2)}`;
-    if (cadLip) cadLip.textContent = `OPEN:${s.lip_open.toFixed(2)}`;
+    // Reference-style large readouts
+    const telTongue = document.getElementById("telTongue");
+    const telJaw = document.getElementById("telJaw");
+    const telLips = document.getElementById("telLips");
+    const telPalate = document.getElementById("telPalate");
+    if (telTongue) telTongue.textContent = s.phoneme === "sil" ? "—" : s.phoneme;
+    if (telJaw) telJaw.textContent = s.jaw_open.toFixed(1);
+    if (telLips) telLips.textContent = s.lip_open.toFixed(1);
+    if (telPalate) telPalate.textContent = s.velum_open >= 0.25 ? "OPEN" : "SHUT";
 
-    const ringFg = document.getElementById("komaRingFg");
-    const ringVal = document.getElementById("komaRingVal");
-    if (ringFg && ringVal) {
-      const pct = Math.max(0.03, s.koma_node / 53);
-      ringFg.style.strokeDashoffset = (226 * (1 - pct)).toFixed(1);
-      ringVal.textContent = `${s.koma_node}`;
-    }
-
-    const setBar = (id, pct) => {
-      const el = document.getElementById(id);
-      if (el) el.style.height = `${Math.max(8, Math.min(100, pct))}%`;
-    };
-    setBar("barF1", (s.f1 / 900) * 100);
-    setBar("barF2", (s.f2 / 2500) * 100);
-    setBar("barF3", (s.f3 / 3200) * 100);
-    setBar("barRms", s.glottis_voicing * 100);
-    setBar("barZ53", (s.koma_node / 53) * 100);
-
+    // Sliders
     document.getElementById("slJaw").value = s.jaw_open;
     document.getElementById("valJaw").textContent = s.jaw_open.toFixed(2);
     document.getElementById("slTx").value = s.tongue_x;
@@ -143,7 +129,7 @@ window.AgApp = (() => {
           div.innerHTML = `
             <div class="morph-top">
               <span class="morph-dst"><span class="root">${r.segmented}</span></span>
-              <span style="color:var(--accent);font-weight:700;">≈ ${r.tr_reconstructed}</span>
+              <span style="color:var(--yellow);font-weight:700;">≈ ${r.tr_reconstructed}</span>
             </div>
             <div class="badges">
               <span class="badge">Kök (${r.root_pos}): ${r.root_tr}</span>
@@ -272,7 +258,7 @@ window.AgApp = (() => {
       document.getElementById(id).addEventListener("input", (e) => {
         const s = window.AgSynth.state;
         s[key] = parseFloat(e.target.value);
-        s.token = "MANUEL_3D_POSE";
+        s.token = "MANUEL_POSE";
         s.f1 = Math.round(260 + s.jaw_open * 360 - s.tongue_y * 120);
         s.f2 = Math.round(750 + s.tongue_x * 1650 - s.lip_round * 420);
         s.f3 = Math.round(2200 + s.tongue_x * 650 - s.lip_round * 250);
