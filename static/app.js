@@ -1,20 +1,6 @@
 window.AgApp = (() => {
-  const REALITIES = [
-    { id: "cyber", label: "REALITY 01 // BIOLUME CYBER" },
-    { id: "blueprint", label: "REALITY 02 // ARCHIVAL CAD" },
-    { id: "solo", label: "REALITY 03 // SOLO SYSTEM" }
-  ];
-  let realityIdx = 0;
   let lastTranslatedItems = [];
   let lastDecodedResults = [];
-
-  function cycleReality() {
-    realityIdx = (realityIdx + 1) % REALITIES.length;
-    const r = REALITIES[realityIdx];
-    document.body.setAttribute("data-reality", r.id);
-    document.getElementById("realityLabel").textContent = r.label;
-    window.AgHead3D.applyThemeColors();
-  }
 
   function updateClock() {
     const now = new Date();
@@ -35,7 +21,6 @@ window.AgApp = (() => {
     document.getElementById("hudFormants").textContent =
       `F₀: ${s.pitch_hz.toFixed(1)}Hz • F₁: ${Math.round(s.f1)} • F₂: ${Math.round(s.f2)} • F₃: ${Math.round(s.f3)}`;
 
-    // CAD Pin Telemetry
     const cadF0 = document.getElementById("cadGlottisVal");
     const cadTongue = document.getElementById("cadTongueVal");
     const cadLip = document.getElementById("cadLipVal");
@@ -43,7 +28,6 @@ window.AgApp = (() => {
     if (cadTongue) cadTongue.textContent = `X:${s.tongue_x.toFixed(2)} Y:${s.tongue_y.toFixed(2)}`;
     if (cadLip) cadLip.textContent = `OPEN:${s.lip_open.toFixed(2)}`;
 
-    // Solo-Leveling Circular Z53 Ring
     const ringFg = document.getElementById("komaRingFg");
     const ringVal = document.getElementById("komaRingVal");
     if (ringFg && ringVal) {
@@ -52,7 +36,6 @@ window.AgApp = (() => {
       ringVal.textContent = `${s.koma_node}`;
     }
 
-    // Equalizer Bars (F1, F2, F3, RMS, Z53)
     const setBar = (id, pct) => {
       const el = document.getElementById(id);
       if (el) el.style.height = `${Math.max(8, Math.min(100, pct))}%`;
@@ -63,7 +46,6 @@ window.AgApp = (() => {
     setBar("barRms", s.glottis_voicing * 100);
     setBar("barZ53", (s.koma_node / 53) * 100);
 
-    // 7-DoF Sliders
     document.getElementById("slJaw").value = s.jaw_open;
     document.getElementById("valJaw").textContent = s.jaw_open.toFixed(2);
     document.getElementById("slTx").value = s.tongue_x;
@@ -212,7 +194,6 @@ window.AgApp = (() => {
   }
 
   function bindEvents() {
-    document.getElementById("changeRealityBtn").addEventListener("click", cycleReality);
     document.getElementById("tabTrToGunes").addEventListener("click", () => switchTab("tabTrToGunes", "paneTrToGunes"));
     document.getElementById("tabGunesToTr").addEventListener("click", () => {
       switchTab("tabGunesToTr", "paneGunesToTr");
@@ -232,18 +213,36 @@ window.AgApp = (() => {
     });
 
     document.getElementById("translateBtn").addEventListener("click", () => runTranslation(false, false));
-    document.getElementById("speakBtn").addEventListener("click", () => runTranslation(true, false));
-    document.getElementById("speakSlowBtn").addEventListener("click", () => runTranslation(true, true));
+    document.getElementById("speakBtn").addEventListener("click", () => {
+      window.AgSynth.unlockAudio();
+      runTranslation(true, false);
+    });
+    document.getElementById("speakSlowBtn").addEventListener("click", () => {
+      window.AgSynth.unlockAudio();
+      runTranslation(true, true);
+    });
     document.getElementById("stopBtn").addEventListener("click", () => window.AgSynth.stopSpeech("DURDURULDU"));
 
     document.getElementById("decodeBtn").addEventListener("click", () => runDecode(false, false));
-    document.getElementById("speakGunesBtn").addEventListener("click", () => runDecode(true, false));
-    document.getElementById("speakGunesSlowBtn").addEventListener("click", () => runDecode(true, true));
+    document.getElementById("speakGunesBtn").addEventListener("click", () => {
+      window.AgSynth.unlockAudio();
+      runDecode(true, false);
+    });
+    document.getElementById("speakGunesSlowBtn").addEventListener("click", () => {
+      window.AgSynth.unlockAudio();
+      runDecode(true, true);
+    });
     document.getElementById("stopBtn2").addEventListener("click", () => window.AgSynth.stopSpeech("DURDURULDU"));
 
-    document.getElementById("chatSendBtn").addEventListener("click", sendChatMessage);
+    document.getElementById("chatSendBtn").addEventListener("click", () => {
+      window.AgSynth.unlockAudio();
+      sendChatMessage();
+    });
     document.getElementById("chatInput").addEventListener("keydown", (e) => {
-      if (e.key === "Enter") sendChatMessage();
+      if (e.key === "Enter") {
+        window.AgSynth.unlockAudio();
+        sendChatMessage();
+      }
     });
 
     const sliderMap = [

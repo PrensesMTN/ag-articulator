@@ -410,6 +410,8 @@ async def serve_ui():
     html_path = BASE_DIR / "static" / "index.html"
     return html_path.read_text(encoding="utf-8")
 
+app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
+
 @app.get("/api/v1/health")
 async def api_health():
     return {

@@ -349,7 +349,7 @@ window.AgSynth = (() => {
       await audio.play();
     } catch (err) {
       console.error(err);
-      stopSpeech("BAĞLANTI HATASI");
+      await speakFormant(gunesText, [], "synth_koma", slowMode);
     }
   }
 
@@ -426,6 +426,7 @@ window.AgSynth = (() => {
   }
 
   return {
+    unlockAudio: ensureAudioAnalyser,
     state,
     speak,
     stopSpeech,

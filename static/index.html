@@ -6,16 +6,14 @@
   <title>AG ARTİKÜLATÖR // Morphology & 3D Acoustics by Design</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-  <link rel="stylesheet" href="/static/styles.css?v=6" />
+  <link rel="stylesheet" href="/static/styles.css?v=9" />
 </head>
-<body data-reality="cyber">
+<body>
 
-  <!-- Fullscreen Three.js 3D Stage -->
   <div id="stageWrap">
     <div id="threeContainer"></div>
   </div>
 
-  <!-- Live 3D-to-2D CAD Leader Lines (Sutera Style) -->
   <svg id="cadOverlay">
     <polyline id="pinPalateLine" class="cad-stroke" points="0,0 0,0 0,0" />
     <circle id="pinPalateDot" class="cad-dot" cx="0" cy="0" r="3" />
@@ -46,16 +44,10 @@
     </g>
   </svg>
 
-  <!-- Top Editorial & Reality Switcher Header -->
   <header class="top-bar">
     <div class="hero-brand">
       <span class="micro-tag">WERR // GÜNEŞ DİLİ ARTİKÜLATÖR SİSTEMİ</span>
       <h1 class="hero-title">AG ARTICULATOR<br/><span>BY DESIGN.</span></h1>
-    </div>
-
-    <div class="reality-switch-wrap">
-      <button id="changeRealityBtn" class="reality-btn">[ CHANGE REALITY ]</button>
-      <span id="realityLabel" class="reality-sub">REALITY 01 // BIOLUME CYBER</span>
     </div>
 
     <div class="top-right-cluster">
@@ -77,7 +69,6 @@
     </div>
   </header>
 
-  <!-- Left Floating HUD Deck -->
   <aside class="hud-deck left-deck">
     <div class="dossier-card">
       <div class="dossier-bar">
@@ -89,7 +80,7 @@
           <strong>AG</strong> (GÜNEŞ / KÖK) + <strong>KÜ</strong> (KANONİK EK)<br/>
           <span>→ 53 HOLDER KOMASI HARMONİK SENTEZİ</span>
         </div>
-        <span>[v6.0]</span>
+        <span>[v9.0]</span>
       </div>
     </div>
 
@@ -105,7 +96,6 @@
         <button id="tabAiChat" class="tab-btn">03. AI SOHBET</button>
       </div>
 
-      <!-- Tab 1: TR -> AG -->
       <div id="paneTrToGunes" class="pane-body">
         <div class="field-label">
           <span>TÜRKÇE METİN GİRİŞİ</span>
@@ -133,7 +123,6 @@
         <div id="morphList" class="morph-list"></div>
       </div>
 
-      <!-- Tab 2: AG -> TR -->
       <div id="paneGunesToTr" class="pane-body" style="display:none;">
         <div class="field-label"><span>GÜNEŞ DİLİ ÇÖZÜMLEYİCİ (DFA KK)</span></div>
         <textarea id="gunesInput">ewlamaro kitaplamaro ogoretemenyima deretri nen</textarea>
@@ -147,7 +136,6 @@
         <div id="decodeList" class="morph-list"></div>
       </div>
 
-      <!-- Tab 3: AI Chat -->
       <div id="paneAiChat" class="pane-body" style="display:none;">
         <div class="field-label">
           <span>GÜNEŞ DİLİ AI ASİSTAN</span>
@@ -167,7 +155,6 @@
     </div>
   </aside>
 
-  <!-- Right Floating HUD Deck (Solo-Leveling Telemetry + 7-DoF Sliders) -->
   <aside class="hud-deck right-deck">
     <div class="dossier-card">
       <div class="dossier-bar">
@@ -238,7 +225,6 @@
     </div>
   </aside>
 
-  <!-- Bottom Center Live IPA & Formant HUD -->
   <div class="bottom-hud-pill">
     <span class="ipa-big" id="hudPhoneme">/a/</span>
     <div class="meta-col">
@@ -247,8 +233,8 @@
     </div>
   </div>
 
-  <script src="/static/synth.js?v=6"></script>
-  <script src="/static/head3d.js?v=6"></script>
-  <script src="/static/app.js?v=6"></script>
+  <script src="/static/synth.js?v=9"></script>
+  <script src="/static/head3d.js?v=9"></script>
+  <script src="/static/app.js?v=9"></script>
 </body>
 </html>
