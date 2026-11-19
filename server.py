@@ -1,3 +1,4 @@
+from fastapi.staticfiles import StaticFiles
 import base64
 import asyncio
 import json
