@@ -42,13 +42,23 @@
       font-size: 10.5px; padding: 3px 8px; border-radius: 4px;
       background: rgba(16, 185, 129, 0.14); color: var(--emerald); border: 1px solid rgba(16, 185, 129, 0.35);
     }
-    .telemetry-bar { display: flex; align-items: center; gap: 14px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; }
+    .telemetry-bar { display: flex; align-items: center; gap: 10px; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
     .telemetry-item strong { color: var(--gold); }
     .voice-picker {
       background: #131e33;
       color: var(--gold);
       border: 1px solid rgba(245, 158, 11, 0.45);
-      padding: 5px 9px;
+      padding: 5px 8px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .speed-picker {
+      background: #131e33;
+      color: var(--cyan);
+      border: 1px solid #263b61;
+      padding: 5px 8px;
       border-radius: 5px;
       font-size: 11px;
       font-weight: 600;
@@ -57,7 +67,7 @@
 
     main {
       display: grid;
-      grid-template-columns: 425px 1fr 290px;
+      grid-template-columns: 445px 1fr 285px;
       gap: 12px;
       padding: 12px;
       height: calc(100vh - 54px);
@@ -149,19 +159,22 @@
       word-break: break-word;
     }
 
-    .btn-row { display: grid; grid-template-columns: 1fr 1.25fr 78px; gap: 6px; }
+    .btn-row { display: grid; grid-template-columns: 0.9fr 1.15fr 0.95fr 68px; gap: 5px; }
     select.preset, button.action {
-      padding: 8px 10px;
+      padding: 8px 8px;
       border-radius: 6px;
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 600;
       cursor: pointer;
+      white-space: nowrap;
     }
     select.preset { width: 100%; background: #121b2e; color: var(--text); border: 1px solid var(--border); }
     button.secondary { background: #162238; color: var(--cyan); border: 1px solid #263b5e; }
     button.secondary:hover { background: #1d2c48; }
     button.primary { background: linear-gradient(135deg, #059669, #10b981); color: #03150e; border: none; }
     button.primary:hover { filter: brightness(1.08); }
+    button.slow { background: rgba(245, 158, 11, 0.16); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.45); }
+    button.slow:hover { background: rgba(245, 158, 11, 0.26); }
     button.danger { background: rgba(239, 68, 68, 0.16); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.45); }
 
     .morph-list {
@@ -296,20 +309,24 @@
 <header>
   <div class="brand">
     <span>☀️ AG ARTİKÜLATÖR // GÜNEŞ DİLİ STUDIO</span>
-    <span class="tag" id="apiSourceBadge">53-KOMA SYNTH + AI HAZIR</span>
+    <span class="tag" id="apiSourceBadge">53-KOMA SYNTH + AI</span>
   </div>
   <div class="telemetry-bar">
     <select id="voiceSelect" class="voice-picker" title="Ses Motoru Seçimi">
-      <option value="synth_koma">☀️ Ag Formant Synth (53-Koma Özel Sentez)</option>
-      <option value="synth_deep">🎛️ Ag Bas Rezonans (Derin Formant Sentez)</option>
+      <option value="synth_koma">☀️ Ag Formant Synth (53-Koma Net)</option>
+      <option value="synth_deep">🎛️ Ag Bas Rezonans (Derin Net)</option>
       <option value="ahmet_natural">🎙️ Ahmet Neural (AI Erkek)</option>
       <option value="emel_natural">🎙️ Emel Neural (AI Kadın)</option>
       <option value="solaris_ai">🤖 Solaris AI (Derin Robotik)</option>
       <option value="astra_ai">✨ Astra AI (Kristal AI)</option>
     </select>
-    <div class="telemetry-item">Z₅₃ KOMA: <strong id="hudKoma">0 / 53</strong></div>
-    <div class="telemetry-item">RMS ENERJİ: <strong id="hudEnergy">0%</strong></div>
-    <div class="telemetry-item">DURUM: <strong id="hudStatus" style="color:#10b981;">HAZIR</strong></div>
+    <select id="speedSelect" class="speed-picker" title="Konuşma Hızı">
+      <option value="1.0">⚡ 1.0x Normal</option>
+      <option value="0.6">🐢 0.6x Yavaş</option>
+    </select>
+    <div class="telemetry-item">Z₅₃: <strong id="hudKoma">0/53</strong></div>
+    <div class="telemetry-item">RMS: <strong id="hudEnergy">0%</strong></div>
+    <div class="telemetry-item"><strong id="hudStatus" style="color:#10b981;">HAZIR</strong></div>
   </div>
 </header>
 
@@ -340,6 +357,7 @@
       <div class="btn-row">
         <button id="translateBtn" class="action secondary">⚡ ÇEVİR</button>
         <button id="speakBtn" class="action primary">▶ SESLENDİR</button>
+        <button id="speakSlowBtn" class="action slow">🐢 YAVAŞ</button>
         <button id="stopBtn" class="action danger">⏹ DUR</button>
       </div>
 
@@ -353,6 +371,7 @@
       <div class="btn-row">
         <button id="decodeBtn" class="action secondary">🔍 ÇÖZÜMLE</button>
         <button id="speakGunesBtn" class="action primary">▶ SESLENDİR</button>
+        <button id="speakGunesSlowBtn" class="action slow">🐢 YAVAŞ</button>
         <button id="stopBtn2" class="action danger">⏹ DUR</button>
       </div>
       <div class="field-label"><span>DFA KÖK | KÜ EK AYRIŞTIRMASI</span></div>
@@ -436,7 +455,7 @@ let analyser = null;
 let currentAudioEl = null;
 let activeSynthNodes = null;
 let activeVisemes = [];
-let playMode = "none"; // "none" | "ai" | "synth"
+let playMode = "none";
 let synthStartTimeCtx = 0;
 let synthEndTimeCtx = 0;
 let lastTranslatedItems = [];
@@ -449,37 +468,39 @@ const state = {
   glottis_voicing: 0.00, f1: 750, f2: 1220, f3: 2500
 };
 
-// Fonem -> [jaw_open, tongue_x, tongue_y, lip_open, lip_round, velum_open, voicing, frication, F1, F2, F3]
+// [jaw_open, tongue_x, tongue_y, lip_open, lip_round, velum_open, voicing, frication, F1, F2, F3, burstFreq]
 const PHONEME_TABLE = {
-  "a": [1.45, 0.25, 0.15, 1.45, 0.00, 0.00, 1.00, 0.00, 750, 1220, 2500],
-  "e": [0.95, 0.78, 0.42, 1.25, 0.00, 0.00, 1.00, 0.00, 520, 1850, 2550],
-  "i": [0.45, 0.90, 0.65, 1.18, 0.00, 0.00, 1.00, 0.00, 310, 2250, 2950],
-  "ı": [0.50, 0.45, 0.55, 1.10, 0.00, 0.00, 1.00, 0.00, 420, 1450, 2450],
-  "o": [0.85, 0.18, 0.36, 0.62, 0.85, 0.00, 1.00, 0.00, 480,  880, 2400],
-  "ö": [0.78, 0.72, 0.45, 0.60, 0.85, 0.00, 1.00, 0.00, 450, 1550, 2300],
-  "u": [0.45, 0.16, 0.60, 0.38, 0.95, 0.00, 1.00, 0.00, 320,  780, 2250],
-  "ü": [0.42, 0.82, 0.62, 0.36, 0.95, 0.00, 1.00, 0.00, 310, 1700, 2250],
-  "b": [0.14, 0.50, 0.32, 0.02, 0.05, 0.00, 0.65, 0.08, 280,  950, 2200],
-  "p": [0.14, 0.50, 0.32, 0.02, 0.05, 0.00, 0.00, 0.22, 280,  950, 2200],
-  "m": [0.16, 0.50, 0.32, 0.02, 0.05, 0.85, 0.85, 0.00, 260, 1050, 2250],
-  "d": [0.28, 0.86, 0.94, 0.74, 0.05, 0.00, 0.65, 0.10, 340, 1650, 2550],
-  "t": [0.28, 0.86, 0.94, 0.74, 0.05, 0.00, 0.00, 0.28, 340, 1650, 2550],
-  "n": [0.30, 0.86, 0.94, 0.76, 0.05, 0.85, 0.85, 0.00, 280, 1550, 2500],
-  "k": [0.44, 0.18, 0.94, 0.85, 0.05, 0.00, 0.00, 0.30, 360, 1150, 2350],
-  "g": [0.44, 0.18, 0.94, 0.85, 0.05, 0.00, 0.65, 0.12, 360, 1150, 2350],
-  "w": [0.38, 0.20, 0.58, 0.34, 0.88, 0.00, 0.90, 0.02, 330,  820, 2250],
-  "v": [0.32, 0.62, 0.40, 0.30, 0.10, 0.00, 0.75, 0.32, 360, 1200, 2400],
-  "f": [0.32, 0.62, 0.40, 0.30, 0.10, 0.00, 0.00, 0.52, 380, 1250, 2450],
-  "s": [0.26, 0.88, 0.84, 0.76, 0.05, 0.00, 0.00, 0.78, 360, 1750, 2750],
-  "z": [0.26, 0.88, 0.84, 0.76, 0.05, 0.00, 0.70, 0.55, 360, 1750, 2750],
-  "ş": [0.30, 0.76, 0.82, 0.56, 0.60, 0.00, 0.00, 0.72, 380, 1950, 2650],
-  "r": [0.52, 0.86, 0.76, 0.92, 0.05, 0.00, 0.90, 0.08, 440, 1420, 1950],
-  "l": [0.52, 0.86, 0.74, 0.95, 0.05, 0.00, 0.92, 0.02, 380, 1520, 2550],
-  "y": [0.40, 0.88, 0.70, 1.00, 0.05, 0.00, 0.92, 0.02, 320, 2100, 2850],
-  "h": [0.74, 0.45, 0.32, 1.00, 0.10, 0.00, 0.00, 0.48, 560, 1450, 2500],
-  "sil": [0.24, 0.48, 0.32, 0.20, 0.05, 0.00, 0.00, 0.00, 500, 1500, 2500]
+  "a": [1.45, 0.25, 0.15, 1.45, 0.00, 0.00, 1.00, 0.00, 760, 1240, 2550, 1800],
+  "e": [0.95, 0.78, 0.42, 1.25, 0.00, 0.00, 1.00, 0.00, 510, 1920, 2620, 2200],
+  "i": [0.45, 0.90, 0.65, 1.18, 0.00, 0.00, 1.00, 0.00, 300, 2320, 3020, 2600],
+  "ı": [0.50, 0.45, 0.55, 1.10, 0.00, 0.00, 1.00, 0.00, 410, 1480, 2500, 2000],
+  "o": [0.85, 0.18, 0.36, 0.62, 0.85, 0.00, 1.00, 0.00, 470,  860, 2420, 1400],
+  "ö": [0.78, 0.72, 0.45, 0.60, 0.85, 0.00, 1.00, 0.00, 440, 1580, 2340, 1800],
+  "u": [0.45, 0.16, 0.60, 0.38, 0.95, 0.00, 1.00, 0.00, 310,  760, 2280, 1200],
+  "ü": [0.42, 0.82, 0.62, 0.36, 0.95, 0.00, 1.00, 0.00, 300, 1740, 2280, 1600],
+  "b": [0.14, 0.50, 0.32, 0.02, 0.05, 0.00, 0.60, 0.24, 280,  950, 2200, 1100],
+  "p": [0.14, 0.50, 0.32, 0.02, 0.05, 0.00, 0.00, 0.48, 280,  950, 2200, 1150],
+  "m": [0.16, 0.50, 0.32, 0.02, 0.05, 0.88, 0.88, 0.00, 260, 1050, 2250, 1000],
+  "d": [0.28, 0.86, 0.94, 0.74, 0.05, 0.00, 0.60, 0.30, 340, 1680, 2580, 3500],
+  "t": [0.28, 0.86, 0.94, 0.74, 0.05, 0.00, 0.00, 0.58, 340, 1680, 2580, 3700],
+  "n": [0.30, 0.86, 0.94, 0.76, 0.05, 0.88, 0.88, 0.00, 280, 1580, 2520, 2400],
+  "k": [0.44, 0.18, 0.94, 0.85, 0.05, 0.00, 0.00, 0.60, 360, 1180, 2380, 1950],
+  "g": [0.44, 0.18, 0.94, 0.85, 0.05, 0.00, 0.60, 0.32, 360, 1180, 2380, 1900],
+  "w": [0.38, 0.20, 0.58, 0.34, 0.88, 0.00, 0.92, 0.04, 330,  820, 2250, 1100],
+  "v": [0.32, 0.62, 0.40, 0.30, 0.10, 0.00, 0.72, 0.44, 360, 1220, 2420, 2600],
+  "f": [0.32, 0.62, 0.40, 0.30, 0.10, 0.00, 0.00, 0.66, 380, 1260, 2460, 2900],
+  "s": [0.26, 0.88, 0.84, 0.76, 0.05, 0.00, 0.00, 0.92, 360, 1780, 2780, 4400],
+  "z": [0.26, 0.88, 0.84, 0.76, 0.05, 0.00, 0.68, 0.68, 360, 1780, 2780, 4100],
+  "ş": [0.30, 0.76, 0.82, 0.56, 0.60, 0.00, 0.00, 0.86, 380, 1980, 2680, 3100],
+  "r": [0.52, 0.86, 0.76, 0.92, 0.05, 0.00, 0.92, 0.12, 440, 1440, 1960, 2200],
+  "l": [0.52, 0.86, 0.74, 0.95, 0.05, 0.00, 0.94, 0.04, 380, 1540, 2560, 2400],
+  "y": [0.40, 0.88, 0.70, 1.00, 0.05, 0.00, 0.94, 0.04, 320, 2140, 2880, 2800],
+  "h": [0.74, 0.45, 0.32, 1.00, 0.10, 0.00, 0.00, 0.62, 560, 1480, 2520, 2100],
+  "sil": [0.24, 0.48, 0.32, 0.20, 0.05, 0.00, 0.00, 0.00, 500, 1500, 2500, 2000]
 };
 const VOWELS = new Set(["a", "e", "i", "ı", "o", "ö", "u", "ü"]);
+const STOPS = new Set(["p", "b", "t", "d", "k", "g"]);
+const VOICED_STOPS = new Set(["b", "d", "g"]);
 
 function trLower(s) {
   return s.replace(/İ/g, "i").replace(/I/g, "ı").toLowerCase();
@@ -534,24 +555,26 @@ function stopSpeech(label = "DURDURULDU") {
 }
 
 // ============================================================================
-// MOTOR 1: ÖZEL 53-KOMA WEB AUDIO FORMANT SENTEZLEYİCİ
+// MOTOR 1: KRİSTAL NETLİKTE 53-KOMA WEB AUDIO FORMANT SENTEZLEYİCİ
 // ============================================================================
-function buildSynthTimeline(gunesText, metaItems = []) {
+function buildSynthTimeline(gunesText, metaItems = [], slowMode = false) {
   const tokens = gunesText.match(/[a-zA-ZçğıöşüÇĞİÖŞÜ]+|[.,!?;]/g) || [];
   const timeline = [];
-  let cursor = 0.04;
+  const tempo = slowMode ? 1.65 : 1.0;
+  const pauseTempo = slowMode ? 1.50 : 1.0;
+  let cursor = 0.05;
   let wordIdx = 0;
 
   for (const tok of tokens) {
     if (/^[.,!?;]$/.test(tok)) {
-      const pauseDur = tok === "," ? 0.14 : 0.24;
+      const pauseDur = (tok === "," || tok === ";") ? (0.34 * pauseTempo) : (0.52 * pauseTempo);
       const sil = PHONEME_TABLE["sil"];
       timeline.push({
         start_s: cursor, end_s: cursor + pauseDur,
         token: "—", phoneme: "sil", koma_node: 0,
         jaw_open: sil[0], tongue_x: sil[1], tongue_y: sil[2],
         lip_open: sil[3], lip_round: sil[4], velum_open: sil[5],
-        voicing: 0, frication: 0, f1: sil[8], f2: sil[9], f3: sil[10]
+        voicing: 0, frication: 0, f1: sil[8], f2: sil[9], f3: sil[10], burstFreq: 2000
       });
       cursor += pauseDur;
       continue;
@@ -566,57 +589,76 @@ function buildSynthTimeline(gunesText, metaItems = []) {
     if (chars.length === 0) chars.push("a");
 
     for (const c of chars) {
-      const dur = VOWELS.has(c) ? 0.125 : 0.068;
       const p = PHONEME_TABLE[c];
-      timeline.push({
-        start_s: cursor,
-        end_s: cursor + dur,
-        token: tok,
-        phoneme: c,
-        koma_node: koma,
-        jaw_open: p[0],
-        tongue_x: p[1],
-        tongue_y: p[2],
-        lip_open: p[3],
-        lip_round: p[4],
-        velum_open: p[5],
-        voicing: p[6],
-        frication: p[7],
-        f1: p[8],
-        f2: p[9],
-        f3: p[10]
-      });
-      cursor += dur;
+
+      if (STOPS.has(c)) {
+        // Aşama 1: Kapanma sessizliği (Stop Closure) -> ünsüzü net ayırır
+        const closureDur = 0.032 * tempo;
+        timeline.push({
+          start_s: cursor, end_s: cursor + closureDur,
+          token: tok, phoneme: c, koma_node: koma,
+          jaw_open: p[0] * 0.6, tongue_x: p[1], tongue_y: p[2],
+          lip_open: p[3] * 0.5, lip_round: p[4], velum_open: 0,
+          voicing: VOICED_STOPS.has(c) ? 0.16 : 0.0,
+          frication: 0.0,
+          f1: p[8], f2: p[9], f3: p[10], burstFreq: p[11]
+        });
+        cursor += closureDur;
+
+        // Aşama 2: Patlama darbesi (Release Burst) -> t/k/p/d/g/b keskin duyulur
+        const burstDur = 0.038 * tempo;
+        timeline.push({
+          start_s: cursor, end_s: cursor + burstDur,
+          token: tok, phoneme: c, koma_node: koma,
+          jaw_open: p[0], tongue_x: p[1], tongue_y: p[2],
+          lip_open: p[3], lip_round: p[4], velum_open: p[5],
+          voicing: p[6], frication: p[7] * 1.25,
+          f1: p[8], f2: p[9], f3: p[10], burstFreq: p[11]
+        });
+        cursor += burstDur;
+      } else {
+        const dur = (VOWELS.has(c) ? 0.135 : 0.072) * tempo;
+        timeline.push({
+          start_s: cursor, end_s: cursor + dur,
+          token: tok, phoneme: c, koma_node: koma,
+          jaw_open: p[0], tongue_x: p[1], tongue_y: p[2],
+          lip_open: p[3], lip_round: p[4], velum_open: p[5],
+          voicing: p[6], frication: p[7],
+          f1: p[8], f2: p[9], f3: p[10], burstFreq: p[11]
+        });
+        cursor += dur;
+      }
     }
 
-    // Kelime arası kısa mikro duraksama
+    // Kelime sonu net kapanış + belirgin kelime arası durak (155ms normal / 230ms yavaş)
+    const wordGap = 0.155 * pauseTempo;
     const sil = PHONEME_TABLE["sil"];
     timeline.push({
-      start_s: cursor, end_s: cursor + 0.045,
+      start_s: cursor, end_s: cursor + wordGap,
       token: tok, phoneme: "sil", koma_node: koma,
       jaw_open: sil[0], tongue_x: sil[1], tongue_y: sil[2],
       lip_open: sil[3], lip_round: sil[4], velum_open: sil[5],
-      voicing: 0, frication: 0, f1: sil[8], f2: sil[9], f3: sil[10]
+      voicing: 0, frication: 0, f1: sil[8], f2: sil[9], f3: sil[10], burstFreq: 2000
     });
-    cursor += 0.045;
+    cursor += wordGap;
     wordIdx++;
   }
 
   return { timeline, totalDur: cursor };
 }
 
-async function speakWithCustomFormantSynth(gunesText, metaItems, voiceId) {
-  stopSpeech("53-KOMA SENTEZLENİYOR...");
+async function speakWithCustomFormantSynth(gunesText, metaItems, voiceId, slowMode = false) {
+  stopSpeech(slowMode ? "YAVAŞ SENTEZ..." : "53-KOMA SENTEZ...");
   ensureAudioAnalyser();
   await audioCtx.resume();
 
-  const { timeline, totalDur } = buildSynthTimeline(gunesText, metaItems);
+  const { timeline, totalDur } = buildSynthTimeline(gunesText, metaItems, slowMode);
   if (!timeline.length) return;
 
   const octaveMult = voiceId === "synth_deep" ? 0.68 : 1.0;
   const now = audioCtx.currentTime + 0.02;
 
-  // 1. Ses Teli Kaynağı (Glottis Osilatörleri)
+  // 1. Geniş Bantlı Ses Teli Kaynağı (Üst harmonikler açık -> boğukluk yok)
   const oscMain = audioCtx.createOscillator();
   oscMain.type = "sawtooth";
   const oscSub = audioCtx.createOscillator();
@@ -624,8 +666,8 @@ async function speakWithCustomFormantSynth(gunesText, metaItems, voiceId) {
 
   const glottalFilter = audioCtx.createBiquadFilter();
   glottalFilter.type = "lowpass";
-  glottalFilter.frequency.setValueAtTime(1150, now);
-  glottalFilter.Q.setValueAtTime(1.2, now);
+  glottalFilter.frequency.setValueAtTime(3400, now);
+  glottalFilter.Q.setValueAtTime(0.85, now);
 
   const voiceGain = audioCtx.createGain();
   voiceGain.gain.setValueAtTime(0.0001, now);
@@ -634,7 +676,7 @@ async function speakWithCustomFormantSynth(gunesText, metaItems, voiceId) {
   oscSub.connect(glottalFilter);
   glottalFilter.connect(voiceGain);
 
-  // 2. Ünsüz Sürtünme/Patlama Gürültü Kaynağı
+  // 2. Frekans Odaklı Ünsüz Patlama/Sürtünme Kaynağı
   const bufferSize = audioCtx.sampleRate * 2;
   const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
   const data = noiseBuffer.getChannelData(0);
@@ -646,8 +688,8 @@ async function speakWithCustomFormantSynth(gunesText, metaItems, voiceId) {
 
   const noiseFilter = audioCtx.createBiquadFilter();
   noiseFilter.type = "bandpass";
-  noiseFilter.frequency.setValueAtTime(3200, now);
-  noiseFilter.Q.setValueAtTime(2.5, now);
+  noiseFilter.frequency.setValueAtTime(2800, now);
+  noiseFilter.Q.setValueAtTime(3.2, now);
 
   const noiseGain = audioCtx.createGain();
   noiseGain.gain.setValueAtTime(0.0001, now);
@@ -655,70 +697,97 @@ async function speakWithCustomFormantSynth(gunesText, metaItems, voiceId) {
   noiseSrc.connect(noiseFilter);
   noiseFilter.connect(noiseGain);
 
-  // 3. Ses Yolu Formant Rezonatörleri (F1, F2, F3 + Nazal)
+  // 3. Keskin Formant Rezonatörleri (F1, F2, F3, F4 + Nazal)
   const f1Filter = audioCtx.createBiquadFilter();
   f1Filter.type = "bandpass";
-  f1Filter.Q.setValueAtTime(5.5, now);
+  f1Filter.Q.setValueAtTime(7.5, now);
   const f1Gain = audioCtx.createGain();
-  f1Gain.gain.setValueAtTime(1.35, now);
+  f1Gain.gain.setValueAtTime(1.45, now);
 
   const f2Filter = audioCtx.createBiquadFilter();
   f2Filter.type = "bandpass";
-  f2Filter.Q.setValueAtTime(7.5, now);
+  f2Filter.Q.setValueAtTime(9.5, now);
   const f2Gain = audioCtx.createGain();
-  f2Gain.gain.setValueAtTime(0.95, now);
+  f2Gain.gain.setValueAtTime(1.25, now);
 
   const f3Filter = audioCtx.createBiquadFilter();
   f3Filter.type = "bandpass";
-  f3Filter.Q.setValueAtTime(9.0, now);
+  f3Filter.Q.setValueAtTime(11.0, now);
   const f3Gain = audioCtx.createGain();
-  f3Gain.gain.setValueAtTime(0.45, now);
+  f3Gain.gain.setValueAtTime(0.75, now);
+
+  const f4Filter = audioCtx.createBiquadFilter();
+  f4Filter.type = "bandpass";
+  f4Filter.frequency.setValueAtTime(3550, now);
+  f4Filter.Q.setValueAtTime(10.0, now);
+  const f4Gain = audioCtx.createGain();
+  f4Gain.gain.setValueAtTime(0.32, now);
 
   const nasalFilter = audioCtx.createBiquadFilter();
   nasalFilter.type = "bandpass";
   nasalFilter.frequency.setValueAtTime(270, now);
-  nasalFilter.Q.setValueAtTime(6.0, now);
+  nasalFilter.Q.setValueAtTime(6.5, now);
   const nasalGain = audioCtx.createGain();
   nasalGain.gain.setValueAtTime(0.001, now);
 
   voiceGain.connect(f1Filter);
   voiceGain.connect(f2Filter);
   voiceGain.connect(f3Filter);
+  voiceGain.connect(f4Filter);
   voiceGain.connect(nasalFilter);
 
-  noiseGain.connect(f2Filter);
-  noiseGain.connect(f3Filter);
+  // Ünsüz gürültüsünü doğrudan netlik katına gönder (boğulmadan duyulsun)
+  const consGain = audioCtx.createGain();
+  consGain.gain.setValueAtTime(0.85, now);
+  noiseGain.connect(consGain);
+
+  // 4. Netlik Rafı (High-Shelf Presence) + Dinamik Kompresör
+  const clarityShelf = audioCtx.createBiquadFilter();
+  clarityShelf.type = "highshelf";
+  clarityShelf.frequency.setValueAtTime(1850, now);
+  clarityShelf.gain.setValueAtTime(5.5, now);
+
+  const compressor = audioCtx.createDynamicsCompressor();
+  compressor.threshold.setValueAtTime(-18, now);
+  compressor.knee.setValueAtTime(12, now);
+  compressor.ratio.setValueAtTime(4.0, now);
+  compressor.attack.setValueAtTime(0.004, now);
+  compressor.release.setValueAtTime(0.07, now);
 
   const masterGain = audioCtx.createGain();
-  masterGain.gain.setValueAtTime(0.42, now);
+  masterGain.gain.setValueAtTime(0.55, now);
 
-  f1Filter.connect(f1Gain); f1Gain.connect(masterGain);
-  f2Filter.connect(f2Gain); f2Gain.connect(masterGain);
-  f3Filter.connect(f3Gain); f3Gain.connect(masterGain);
-  nasalFilter.connect(nasalGain); nasalGain.connect(masterGain);
+  f1Filter.connect(f1Gain); f1Gain.connect(clarityShelf);
+  f2Filter.connect(f2Gain); f2Gain.connect(clarityShelf);
+  f3Filter.connect(f3Gain); f3Gain.connect(clarityShelf);
+  f4Filter.connect(f4Gain); f4Gain.connect(clarityShelf);
+  nasalFilter.connect(nasalGain); nasalGain.connect(clarityShelf);
+  consGain.connect(clarityShelf);
 
+  clarityShelf.connect(compressor);
+  compressor.connect(masterGain);
   masterGain.connect(analyser);
   analyser.connect(audioCtx.destination);
 
-  // Zaman çizelgesini Web Audio düğümlerine programla
   for (const seg of timeline) {
     const t0 = now + seg.start_s;
     const f0 = state.base_f0 * octaveMult * Math.pow(2.0, seg.koma_node / 53.0);
 
-    oscMain.frequency.setTargetAtTime(f0, t0, 0.015);
-    oscSub.frequency.setTargetAtTime(f0 * 0.5, t0, 0.015);
+    oscMain.frequency.setTargetAtTime(f0, t0, 0.010);
+    oscSub.frequency.setTargetAtTime(f0 * 0.5, t0, 0.010);
 
-    f1Filter.frequency.setTargetAtTime(seg.f1, t0, 0.016);
-    f2Filter.frequency.setTargetAtTime(seg.f2, t0, 0.016);
-    f3Filter.frequency.setTargetAtTime(seg.f3, t0, 0.016);
+    f1Filter.frequency.setTargetAtTime(seg.f1, t0, 0.011);
+    f2Filter.frequency.setTargetAtTime(seg.f2, t0, 0.011);
+    f3Filter.frequency.setTargetAtTime(seg.f3, t0, 0.011);
+    noiseFilter.frequency.setTargetAtTime(seg.burstFreq || 2600, t0, 0.008);
 
-    voiceGain.gain.setTargetAtTime(Math.max(0.0001, seg.voicing * 0.85), t0, 0.012);
-    noiseGain.gain.setTargetAtTime(Math.max(0.0001, seg.frication * 0.35), t0, 0.010);
-    nasalGain.gain.setTargetAtTime(Math.max(0.0001, seg.velum_open * 0.90), t0, 0.015);
+    voiceGain.gain.setTargetAtTime(Math.max(0.0001, seg.voicing * 0.92), t0, 0.007);
+    noiseGain.gain.setTargetAtTime(Math.max(0.0001, seg.frication * 0.42), t0, 0.006);
+    nasalGain.gain.setTargetAtTime(Math.max(0.0001, seg.velum_open * 0.95), t0, 0.010);
   }
 
   const endAt = now + totalDur + 0.05;
-  masterGain.gain.setTargetAtTime(0.0001, endAt - 0.04, 0.015);
+  masterGain.gain.setTargetAtTime(0.0001, endAt - 0.04, 0.012);
 
   oscMain.start(now);
   oscSub.start(now);
@@ -734,15 +803,15 @@ async function speakWithCustomFormantSynth(gunesText, metaItems, voiceId) {
   playMode = "synth";
 
   const statusEl = document.getElementById("hudStatus");
-  statusEl.textContent = "FORMANT SENTEZ";
+  statusEl.textContent = slowMode ? "YAVAŞ SENTEZ" : "FORMANT NET";
   statusEl.style.color = "#f59e0b";
 }
 
 // ============================================================================
 // MOTOR 2: NÖRAL AI SES ÜRETİCİ (EDGE-TTS API)
 // ============================================================================
-async function speakWithNeuralAI(gunesText, voiceId) {
-  stopSpeech("AI SES ÜRETİLİYOR...");
+async function speakWithNeuralAI(gunesText, voiceId, slowMode = false) {
+  stopSpeech(slowMode ? "AI YAVAŞ ÜRETİM..." : "AI SES ÜRETİLİYOR...");
   const statusEl = document.getElementById("hudStatus");
   statusEl.style.color = "#38bdf8";
 
@@ -756,16 +825,22 @@ async function speakWithNeuralAI(gunesText, voiceId) {
     const data = await res.json();
 
     ensureAudioAnalyser();
-    activeVisemes = data.visemes || [];
+    const rate = slowMode ? 0.65 : 1.0;
+    activeVisemes = (data.visemes || []).map(v => ({
+      ...v,
+      start_s: v.start_s / rate,
+      end_s: v.end_s / rate
+    }));
 
     const audio = new Audio(`data:${data.mime_type};base64,${data.audio_base64}`);
+    audio.playbackRate = rate;
     const sourceNode = audioCtx.createMediaElementSource(audio);
     sourceNode.connect(analyser);
     analyser.connect(audioCtx.destination);
 
     currentAudioEl = audio;
     playMode = "ai";
-    statusEl.textContent = "AI KONUŞUYOR";
+    statusEl.textContent = slowMode ? "AI YAVAŞ" : "AI KONUŞUYOR";
     statusEl.style.color = "#f59e0b";
 
     audio.onended = () => stopSpeech("TAMAMLANDI");
@@ -777,13 +852,14 @@ async function speakWithNeuralAI(gunesText, voiceId) {
   }
 }
 
-async function speakText(gunesText, metaItems = []) {
+async function speakText(gunesText, metaItems = [], forceSlow = false) {
   if (!gunesText || !gunesText.trim()) return;
+  const slowMode = forceSlow || (document.getElementById("speedSelect").value !== "1.0");
   const voiceId = document.getElementById("voiceSelect").value;
   if (voiceId.startsWith("synth_")) {
-    await speakWithCustomFormantSynth(gunesText, metaItems, voiceId);
+    await speakWithCustomFormantSynth(gunesText, metaItems, voiceId, slowMode);
   } else {
-    await speakWithNeuralAI(gunesText, voiceId);
+    await speakWithNeuralAI(gunesText, voiceId, slowMode);
   }
 }
 
@@ -831,12 +907,12 @@ function updateLipSyncFromAudio() {
     }
 
     const energyGain = playMode === "synth" ? 0.95 : (0.35 + rms * 0.85);
-    state.jaw_open += ((target.jaw_open * energyGain) - state.jaw_open) * 0.34;
-    state.tongue_x += (target.tongue_x - state.tongue_x) * 0.32;
-    state.tongue_y += (target.tongue_y - state.tongue_y) * 0.32;
-    state.lip_open += ((target.lip_open * energyGain) - state.lip_open) * 0.34;
-    state.lip_round += (target.lip_round - state.lip_round) * 0.32;
-    state.velum_open += (target.velum_open - state.velum_open) * 0.32;
+    state.jaw_open += ((target.jaw_open * energyGain) - state.jaw_open) * 0.36;
+    state.tongue_x += (target.tongue_x - state.tongue_x) * 0.34;
+    state.tongue_y += (target.tongue_y - state.tongue_y) * 0.34;
+    state.lip_open += ((target.lip_open * energyGain) - state.lip_open) * 0.36;
+    state.lip_round += (target.lip_round - state.lip_round) * 0.34;
+    state.velum_open += (target.velum_open - state.velum_open) * 0.34;
   } else {
     state.jaw_open += ((0.22 + rms * 0.75) - state.jaw_open) * 0.25;
     state.lip_open += ((0.18 + rms * 0.85) - state.lip_open) * 0.25;
@@ -850,13 +926,13 @@ async function checkApiHealth() {
   try {
     const res = await fetch("/api/v1/health");
     const data = await res.json();
-    document.getElementById("apiSourceBadge").textContent = `53-KOMA SYNTH + AI • ${data.suffixes_count} EK`;
+    document.getElementById("apiSourceBadge").textContent = `53-KOMA NET + AI • ${data.suffixes_count} EK`;
   } catch (_) {
     document.getElementById("apiSourceBadge").textContent = "53-KOMA YEREL SYNTH AKTİF";
   }
 }
 
-async function runTranslation(andSpeak = false) {
+async function runTranslation(andSpeak = false, forceSlow = false) {
   const text = document.getElementById("trInput").value;
   const res = await fetch("/api/v1/translate", {
     method: "POST",
@@ -892,11 +968,11 @@ async function runTranslation(andSpeak = false) {
   }
 
   if (andSpeak && data.gunes_text) {
-    await speakText(data.gunes_text, lastTranslatedItems);
+    await speakText(data.gunes_text, lastTranslatedItems, forceSlow);
   }
 }
 
-async function runDecode(andSpeak = false) {
+async function runDecode(andSpeak = false, forceSlow = false) {
   const text = document.getElementById("gunesInput").value;
   const res = await fetch("/api/v1/decode", {
     method: "POST",
@@ -929,7 +1005,7 @@ async function runDecode(andSpeak = false) {
     const meta = lastDecodedResults.map(r => ({
       koma_slot: r.slots && r.slots.length ? r.slots[r.slots.length - 1].koma : 0
     }));
-    await speakText(text, meta);
+    await speakText(text, meta, forceSlow);
   }
 }
 
@@ -963,7 +1039,7 @@ async function sendChatMessage() {
   log.appendChild(botDiv);
   log.scrollTop = log.scrollHeight;
 
-  await speakText(data.gunes_text, data.items || []);
+  await speakText(data.gunes_text, data.items || [], false);
 }
 
 function switchTab(activeTabId, activePaneId) {
@@ -985,7 +1061,7 @@ document.getElementById("voiceSelect").addEventListener("change", (e) => {
 document.getElementById("tabTrToGunes").addEventListener("click", () => switchTab("tabTrToGunes", "paneTrToGunes"));
 document.getElementById("tabGunesToTr").addEventListener("click", () => {
   switchTab("tabGunesToTr", "paneGunesToTr");
-  runDecode(false);
+  runDecode(false, false);
 });
 document.getElementById("tabAiChat").addEventListener("click", () => switchTab("tabAiChat", "paneAiChat"));
 
@@ -998,15 +1074,19 @@ document.getElementById("presetSelect").addEventListener("change", (e) => {
     s4: "Merhaba dünya, güneş dili konuşuyor."
   };
   box.value = presets[e.target.value];
-  runTranslation(false);
+  runTranslation(false, false);
 });
 
-document.getElementById("translateBtn").addEventListener("click", () => runTranslation(false));
-document.getElementById("speakBtn").addEventListener("click", () => runTranslation(true));
+document.getElementById("translateBtn").addEventListener("click", () => runTranslation(false, false));
+document.getElementById("speakBtn").addEventListener("click", () => runTranslation(true, false));
+document.getElementById("speakSlowBtn").addEventListener("click", () => runTranslation(true, true));
 document.getElementById("stopBtn").addEventListener("click", () => stopSpeech("DURDURULDU"));
-document.getElementById("decodeBtn").addEventListener("click", () => runDecode(false));
-document.getElementById("speakGunesBtn").addEventListener("click", () => runDecode(true));
+
+document.getElementById("decodeBtn").addEventListener("click", () => runDecode(false, false));
+document.getElementById("speakGunesBtn").addEventListener("click", () => runDecode(true, false));
+document.getElementById("speakGunesSlowBtn").addEventListener("click", () => runDecode(true, true));
 document.getElementById("stopBtn2").addEventListener("click", () => stopSpeech("DURDURULDU"));
+
 document.getElementById("chatSendBtn").addEventListener("click", sendChatMessage);
 document.getElementById("chatInput").addEventListener("keydown", (e) => {
   if (e.key === "Enter") sendChatMessage();
@@ -1015,7 +1095,7 @@ document.getElementById("chatInput").addEventListener("keydown", (e) => {
 function updateHUD() {
   document.getElementById("hudPhoneme").textContent = `/${state.phoneme}/`;
   document.getElementById("hudToken").textContent = `HECE: ${state.token}`;
-  document.getElementById("hudKoma").textContent = `${state.koma_node} / 53`;
+  document.getElementById("hudKoma").textContent = `${state.koma_node}/53`;
   document.getElementById("hudEnergy").textContent = `${Math.round(state.glottis_voicing * 100)}%`;
   document.getElementById("hudFormants").textContent =
     `F₀: ${state.pitch_hz.toFixed(1)}Hz • F₁: ${Math.round(state.f1)} • F₂: ${Math.round(state.f2)} • F₃: ${Math.round(state.f3)}`;
@@ -1294,7 +1374,7 @@ function animate(now) {
 requestAnimationFrame(animate);
 
 checkApiHealth();
-runTranslation(false);
+runTranslation(false, false);
 </script>
 </body>
 </html>
