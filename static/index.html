@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GÜNEŞ DİLİ // Neural AI Voice & 3D Artikülatör</title>
+  <title>AG ARTİKÜLATÖR // 53-Koma Formant Synth & Neural AI Studio</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
   <style>
@@ -46,8 +46,8 @@
     .telemetry-item strong { color: var(--gold); }
     .voice-picker {
       background: #131e33;
-      color: var(--cyan);
-      border: 1px solid #263b61;
+      color: var(--gold);
+      border: 1px solid rgba(245, 158, 11, 0.45);
       padding: 5px 9px;
       border-radius: 5px;
       font-size: 11px;
@@ -284,8 +284,8 @@
       pointer-events: none;
     }
 
-    .sliders { padding: 11px 13px; display: flex; flex-direction: column; gap: 11px; overflow-y: auto; }
-    .slider-row { display: flex; flex-direction: column; gap: 4px; }
+    .sliders { padding: 10px 13px; display: flex; flex-direction: column; gap: 9px; overflow-y: auto; }
+    .slider-row { display: flex; flex-direction: column; gap: 3px; }
     .slider-label { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
     .slider-label span:last-child { color: var(--text); }
     input[type="range"] { width: 100%; accent-color: var(--gold); cursor: pointer; }
@@ -295,13 +295,15 @@
 
 <header>
   <div class="brand">
-    <span>☀️ GÜNEŞ DİLİ NEURAL AI STUDIO</span>
-    <span class="tag" id="apiSourceBadge">NEURAL TTS BAĞLANIYOR...</span>
+    <span>☀️ AG ARTİKÜLATÖR // GÜNEŞ DİLİ STUDIO</span>
+    <span class="tag" id="apiSourceBadge">53-KOMA SYNTH + AI HAZIR</span>
   </div>
   <div class="telemetry-bar">
-    <select id="voiceSelect" class="voice-picker">
-      <option value="ahmet_natural">🎙️ Ahmet Neural (Doğal Erkek)</option>
-      <option value="emel_natural">🎙️ Emel Neural (Doğal Kadın)</option>
+    <select id="voiceSelect" class="voice-picker" title="Ses Motoru Seçimi">
+      <option value="synth_koma">☀️ Ag Formant Synth (53-Koma Özel Sentez)</option>
+      <option value="synth_deep">🎛️ Ag Bas Rezonans (Derin Formant Sentez)</option>
+      <option value="ahmet_natural">🎙️ Ahmet Neural (AI Erkek)</option>
+      <option value="emel_natural">🎙️ Emel Neural (AI Kadın)</option>
       <option value="solaris_ai">🤖 Solaris AI (Derin Robotik)</option>
       <option value="astra_ai">✨ Astra AI (Kristal AI)</option>
     </select>
@@ -337,7 +339,7 @@
 
       <div class="btn-row">
         <button id="translateBtn" class="action secondary">⚡ ÇEVİR</button>
-        <button id="speakBtn" class="action primary">🎙️ AI SESLENDİR</button>
+        <button id="speakBtn" class="action primary">▶ SESLENDİR</button>
         <button id="stopBtn" class="action danger">⏹ DUR</button>
       </div>
 
@@ -350,7 +352,7 @@
       <textarea id="gunesInput">ewlamaro kitaplamaro ogoretemenyima deretri nen</textarea>
       <div class="btn-row">
         <button id="decodeBtn" class="action secondary">🔍 ÇÖZÜMLE</button>
-        <button id="speakGunesBtn" class="action primary">🎙️ AI SESLENDİR</button>
+        <button id="speakGunesBtn" class="action primary">▶ SESLENDİR</button>
         <button id="stopBtn2" class="action danger">⏹ DUR</button>
       </div>
       <div class="field-label"><span>DFA KÖK | KÜ EK AYRIŞTIRMASI</span></div>
@@ -365,7 +367,7 @@
       <div id="chatLog" class="chat-log">
         <div class="chat-msg bot">
           <div class="g-line">☀️ merhaban insan, ag dilsi konuspo robotyima.</div>
-          <div class="tr-line">Türkçe bir soru sor; cevabı Güneş Dili'ne çevirip yapay zeka sesiyle konuşayım.</div>
+          <div class="tr-line">Türkçe bir soru sor; cevabı Güneş Dili'ne çevirip seçili ses motoruyla konuşayım.</div>
         </div>
       </div>
       <div class="chat-input-row">
@@ -376,12 +378,12 @@
   </section>
 
   <section class="card">
-    <div class="card-header"><span>2. Three.js 3D Artikülatör Kafa Rig</span><span>Neural AI Lip-Sync</span></div>
+    <div class="card-header"><span>2. Three.js 3D Artikülatör Kafa Rig</span><span id="engineModeLabel">53-Koma Formant Synth</span></div>
     <div class="viewport">
       <div class="ipa-hud">
         <div class="phoneme" id="hudPhoneme">/a/</div>
         <div class="token" id="hudToken">HECE: ag</div>
-        <div class="formants" id="hudFormants">SYNC: NEURAL TTS + RMS VISEME</div>
+        <div class="formants" id="hudFormants">F₁: 750Hz • F₂: 1220Hz • F₃: 2500Hz</div>
       </div>
       <div id="threeContainer"></div>
       <div class="cam-hint">🖱️ Sürükle: 360° Döndür • Tekerlek: Yakınlaş</div>
@@ -390,7 +392,7 @@
   </section>
 
   <section class="card">
-    <div class="card-header"><span>3. 7-DoF Anatomi Vektörü</span><span>Canlı</span></div>
+    <div class="card-header"><span>3. 7-DoF Anatomi & F₀ Vektörü</span><span>Canlı</span></div>
     <div class="sliders">
       <div class="slider-row">
         <div class="slider-label"><span>JAW OPEN (Çene Açıklığı)</span><span id="valJaw">0.24</span></div>
@@ -417,8 +419,12 @@
         <input type="range" id="slVel" min="0.00" max="1.00" step="0.01" value="0.00" />
       </div>
       <div class="slider-row">
-        <div class="slider-label"><span>VOCAL ACTIVITY (Ses Enerjisi)</span><span id="valGlo">0.00</span></div>
+        <div class="slider-label"><span>GLOTTIS (Ses Teli Şiddeti)</span><span id="valGlo">0.00</span></div>
         <input type="range" id="slGlo" min="0.00" max="1.00" step="0.01" value="0.00" />
+      </div>
+      <div class="slider-row">
+        <div class="slider-label"><span>PITCH F₀ (Temel Frekans Hz)</span><span id="valF0">130.8</span></div>
+        <input type="range" id="slF0" min="80" max="260" step="0.5" value="130.8" />
       </div>
     </div>
   </section>
@@ -428,15 +434,56 @@
 let audioCtx = null;
 let analyser = null;
 let currentAudioEl = null;
+let activeSynthNodes = null;
 let activeVisemes = [];
-let isPlaying = false;
+let playMode = "none"; // "none" | "ai" | "synth"
+let synthStartTimeCtx = 0;
+let synthEndTimeCtx = 0;
+let lastTranslatedItems = [];
+let lastDecodedResults = [];
 
 const state = {
-  token: "ag", phoneme: "sil", koma_node: 0, pitch_hz: 130.81,
+  token: "ag", phoneme: "sil", koma_node: 0, base_f0: 130.81, pitch_hz: 130.81,
   jaw_open: 0.24, tongue_x: 0.48, tongue_y: 0.32,
   lip_open: 0.20, lip_round: 0.05, velum_open: 0.00,
-  glottis_voicing: 0.00
+  glottis_voicing: 0.00, f1: 750, f2: 1220, f3: 2500
 };
+
+// Fonem -> [jaw_open, tongue_x, tongue_y, lip_open, lip_round, velum_open, voicing, frication, F1, F2, F3]
+const PHONEME_TABLE = {
+  "a": [1.45, 0.25, 0.15, 1.45, 0.00, 0.00, 1.00, 0.00, 750, 1220, 2500],
+  "e": [0.95, 0.78, 0.42, 1.25, 0.00, 0.00, 1.00, 0.00, 520, 1850, 2550],
+  "i": [0.45, 0.90, 0.65, 1.18, 0.00, 0.00, 1.00, 0.00, 310, 2250, 2950],
+  "ı": [0.50, 0.45, 0.55, 1.10, 0.00, 0.00, 1.00, 0.00, 420, 1450, 2450],
+  "o": [0.85, 0.18, 0.36, 0.62, 0.85, 0.00, 1.00, 0.00, 480,  880, 2400],
+  "ö": [0.78, 0.72, 0.45, 0.60, 0.85, 0.00, 1.00, 0.00, 450, 1550, 2300],
+  "u": [0.45, 0.16, 0.60, 0.38, 0.95, 0.00, 1.00, 0.00, 320,  780, 2250],
+  "ü": [0.42, 0.82, 0.62, 0.36, 0.95, 0.00, 1.00, 0.00, 310, 1700, 2250],
+  "b": [0.14, 0.50, 0.32, 0.02, 0.05, 0.00, 0.65, 0.08, 280,  950, 2200],
+  "p": [0.14, 0.50, 0.32, 0.02, 0.05, 0.00, 0.00, 0.22, 280,  950, 2200],
+  "m": [0.16, 0.50, 0.32, 0.02, 0.05, 0.85, 0.85, 0.00, 260, 1050, 2250],
+  "d": [0.28, 0.86, 0.94, 0.74, 0.05, 0.00, 0.65, 0.10, 340, 1650, 2550],
+  "t": [0.28, 0.86, 0.94, 0.74, 0.05, 0.00, 0.00, 0.28, 340, 1650, 2550],
+  "n": [0.30, 0.86, 0.94, 0.76, 0.05, 0.85, 0.85, 0.00, 280, 1550, 2500],
+  "k": [0.44, 0.18, 0.94, 0.85, 0.05, 0.00, 0.00, 0.30, 360, 1150, 2350],
+  "g": [0.44, 0.18, 0.94, 0.85, 0.05, 0.00, 0.65, 0.12, 360, 1150, 2350],
+  "w": [0.38, 0.20, 0.58, 0.34, 0.88, 0.00, 0.90, 0.02, 330,  820, 2250],
+  "v": [0.32, 0.62, 0.40, 0.30, 0.10, 0.00, 0.75, 0.32, 360, 1200, 2400],
+  "f": [0.32, 0.62, 0.40, 0.30, 0.10, 0.00, 0.00, 0.52, 380, 1250, 2450],
+  "s": [0.26, 0.88, 0.84, 0.76, 0.05, 0.00, 0.00, 0.78, 360, 1750, 2750],
+  "z": [0.26, 0.88, 0.84, 0.76, 0.05, 0.00, 0.70, 0.55, 360, 1750, 2750],
+  "ş": [0.30, 0.76, 0.82, 0.56, 0.60, 0.00, 0.00, 0.72, 380, 1950, 2650],
+  "r": [0.52, 0.86, 0.76, 0.92, 0.05, 0.00, 0.90, 0.08, 440, 1420, 1950],
+  "l": [0.52, 0.86, 0.74, 0.95, 0.05, 0.00, 0.92, 0.02, 380, 1520, 2550],
+  "y": [0.40, 0.88, 0.70, 1.00, 0.05, 0.00, 0.92, 0.02, 320, 2100, 2850],
+  "h": [0.74, 0.45, 0.32, 1.00, 0.10, 0.00, 0.00, 0.48, 560, 1450, 2500],
+  "sil": [0.24, 0.48, 0.32, 0.20, 0.05, 0.00, 0.00, 0.00, 500, 1500, 2500]
+};
+const VOWELS = new Set(["a", "e", "i", "ı", "o", "ö", "u", "ü"]);
+
+function trLower(s) {
+  return s.replace(/İ/g, "i").replace(/I/g, "ı").toLowerCase();
+}
 
 function ensureAudioAnalyser() {
   if (!audioCtx) {
@@ -451,7 +498,8 @@ function ensureAudioAnalyser() {
 }
 
 function stopSpeech(label = "DURDURULDU") {
-  isPlaying = false;
+  playMode = "none";
+
   if (currentAudioEl) {
     try {
       currentAudioEl.pause();
@@ -459,6 +507,18 @@ function stopSpeech(label = "DURDURULDU") {
     } catch (_) {}
     currentAudioEl = null;
   }
+
+  if (activeSynthNodes) {
+    try {
+      activeSynthNodes.masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+      activeSynthNodes.masterGain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+      activeSynthNodes.oscMain.stop();
+      activeSynthNodes.oscSub.stop();
+      activeSynthNodes.noiseSrc.stop();
+    } catch (_) {}
+    activeSynthNodes = null;
+  }
+
   activeVisemes = [];
   state.glottis_voicing = 0.0;
   state.velum_open = 0.0;
@@ -473,13 +533,219 @@ function stopSpeech(label = "DURDURULDU") {
   statusEl.style.color = label === "DURDURULDU" ? "#fca5a5" : "#10b981";
 }
 
-async function speakWithNeuralAI(gunesText) {
-  if (!gunesText || !gunesText.trim()) return;
+// ============================================================================
+// MOTOR 1: ÖZEL 53-KOMA WEB AUDIO FORMANT SENTEZLEYİCİ
+// ============================================================================
+function buildSynthTimeline(gunesText, metaItems = []) {
+  const tokens = gunesText.match(/[a-zA-ZçğıöşüÇĞİÖŞÜ]+|[.,!?;]/g) || [];
+  const timeline = [];
+  let cursor = 0.04;
+  let wordIdx = 0;
+
+  for (const tok of tokens) {
+    if (/^[.,!?;]$/.test(tok)) {
+      const pauseDur = tok === "," ? 0.14 : 0.24;
+      const sil = PHONEME_TABLE["sil"];
+      timeline.push({
+        start_s: cursor, end_s: cursor + pauseDur,
+        token: "—", phoneme: "sil", koma_node: 0,
+        jaw_open: sil[0], tongue_x: sil[1], tongue_y: sil[2],
+        lip_open: sil[3], lip_round: sil[4], velum_open: sil[5],
+        voicing: 0, frication: 0, f1: sil[8], f2: sil[9], f3: sil[10]
+      });
+      cursor += pauseDur;
+      continue;
+    }
+
+    const meta = metaItems[wordIdx] || {};
+    const koma = typeof meta.koma_slot === "number"
+      ? meta.koma_slot
+      : [...tok].reduce((acc, ch, i) => (acc + (i + 1) * ch.charCodeAt(0)) % 53, 0);
+
+    const chars = [...trLower(tok)].filter(c => PHONEME_TABLE[c]);
+    if (chars.length === 0) chars.push("a");
+
+    for (const c of chars) {
+      const dur = VOWELS.has(c) ? 0.125 : 0.068;
+      const p = PHONEME_TABLE[c];
+      timeline.push({
+        start_s: cursor,
+        end_s: cursor + dur,
+        token: tok,
+        phoneme: c,
+        koma_node: koma,
+        jaw_open: p[0],
+        tongue_x: p[1],
+        tongue_y: p[2],
+        lip_open: p[3],
+        lip_round: p[4],
+        velum_open: p[5],
+        voicing: p[6],
+        frication: p[7],
+        f1: p[8],
+        f2: p[9],
+        f3: p[10]
+      });
+      cursor += dur;
+    }
+
+    // Kelime arası kısa mikro duraksama
+    const sil = PHONEME_TABLE["sil"];
+    timeline.push({
+      start_s: cursor, end_s: cursor + 0.045,
+      token: tok, phoneme: "sil", koma_node: koma,
+      jaw_open: sil[0], tongue_x: sil[1], tongue_y: sil[2],
+      lip_open: sil[3], lip_round: sil[4], velum_open: sil[5],
+      voicing: 0, frication: 0, f1: sil[8], f2: sil[9], f3: sil[10]
+    });
+    cursor += 0.045;
+    wordIdx++;
+  }
+
+  return { timeline, totalDur: cursor };
+}
+
+async function speakWithCustomFormantSynth(gunesText, metaItems, voiceId) {
+  stopSpeech("53-KOMA SENTEZLENİYOR...");
+  ensureAudioAnalyser();
+  await audioCtx.resume();
+
+  const { timeline, totalDur } = buildSynthTimeline(gunesText, metaItems);
+  if (!timeline.length) return;
+
+  const octaveMult = voiceId === "synth_deep" ? 0.68 : 1.0;
+  const now = audioCtx.currentTime + 0.02;
+
+  // 1. Ses Teli Kaynağı (Glottis Osilatörleri)
+  const oscMain = audioCtx.createOscillator();
+  oscMain.type = "sawtooth";
+  const oscSub = audioCtx.createOscillator();
+  oscSub.type = "triangle";
+
+  const glottalFilter = audioCtx.createBiquadFilter();
+  glottalFilter.type = "lowpass";
+  glottalFilter.frequency.setValueAtTime(1150, now);
+  glottalFilter.Q.setValueAtTime(1.2, now);
+
+  const voiceGain = audioCtx.createGain();
+  voiceGain.gain.setValueAtTime(0.0001, now);
+
+  oscMain.connect(glottalFilter);
+  oscSub.connect(glottalFilter);
+  glottalFilter.connect(voiceGain);
+
+  // 2. Ünsüz Sürtünme/Patlama Gürültü Kaynağı
+  const bufferSize = audioCtx.sampleRate * 2;
+  const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+  const noiseSrc = audioCtx.createBufferSource();
+  noiseSrc.buffer = noiseBuffer;
+  noiseSrc.loop = true;
+
+  const noiseFilter = audioCtx.createBiquadFilter();
+  noiseFilter.type = "bandpass";
+  noiseFilter.frequency.setValueAtTime(3200, now);
+  noiseFilter.Q.setValueAtTime(2.5, now);
+
+  const noiseGain = audioCtx.createGain();
+  noiseGain.gain.setValueAtTime(0.0001, now);
+
+  noiseSrc.connect(noiseFilter);
+  noiseFilter.connect(noiseGain);
+
+  // 3. Ses Yolu Formant Rezonatörleri (F1, F2, F3 + Nazal)
+  const f1Filter = audioCtx.createBiquadFilter();
+  f1Filter.type = "bandpass";
+  f1Filter.Q.setValueAtTime(5.5, now);
+  const f1Gain = audioCtx.createGain();
+  f1Gain.gain.setValueAtTime(1.35, now);
+
+  const f2Filter = audioCtx.createBiquadFilter();
+  f2Filter.type = "bandpass";
+  f2Filter.Q.setValueAtTime(7.5, now);
+  const f2Gain = audioCtx.createGain();
+  f2Gain.gain.setValueAtTime(0.95, now);
+
+  const f3Filter = audioCtx.createBiquadFilter();
+  f3Filter.type = "bandpass";
+  f3Filter.Q.setValueAtTime(9.0, now);
+  const f3Gain = audioCtx.createGain();
+  f3Gain.gain.setValueAtTime(0.45, now);
+
+  const nasalFilter = audioCtx.createBiquadFilter();
+  nasalFilter.type = "bandpass";
+  nasalFilter.frequency.setValueAtTime(270, now);
+  nasalFilter.Q.setValueAtTime(6.0, now);
+  const nasalGain = audioCtx.createGain();
+  nasalGain.gain.setValueAtTime(0.001, now);
+
+  voiceGain.connect(f1Filter);
+  voiceGain.connect(f2Filter);
+  voiceGain.connect(f3Filter);
+  voiceGain.connect(nasalFilter);
+
+  noiseGain.connect(f2Filter);
+  noiseGain.connect(f3Filter);
+
+  const masterGain = audioCtx.createGain();
+  masterGain.gain.setValueAtTime(0.42, now);
+
+  f1Filter.connect(f1Gain); f1Gain.connect(masterGain);
+  f2Filter.connect(f2Gain); f2Gain.connect(masterGain);
+  f3Filter.connect(f3Gain); f3Gain.connect(masterGain);
+  nasalFilter.connect(nasalGain); nasalGain.connect(masterGain);
+
+  masterGain.connect(analyser);
+  analyser.connect(audioCtx.destination);
+
+  // Zaman çizelgesini Web Audio düğümlerine programla
+  for (const seg of timeline) {
+    const t0 = now + seg.start_s;
+    const f0 = state.base_f0 * octaveMult * Math.pow(2.0, seg.koma_node / 53.0);
+
+    oscMain.frequency.setTargetAtTime(f0, t0, 0.015);
+    oscSub.frequency.setTargetAtTime(f0 * 0.5, t0, 0.015);
+
+    f1Filter.frequency.setTargetAtTime(seg.f1, t0, 0.016);
+    f2Filter.frequency.setTargetAtTime(seg.f2, t0, 0.016);
+    f3Filter.frequency.setTargetAtTime(seg.f3, t0, 0.016);
+
+    voiceGain.gain.setTargetAtTime(Math.max(0.0001, seg.voicing * 0.85), t0, 0.012);
+    noiseGain.gain.setTargetAtTime(Math.max(0.0001, seg.frication * 0.35), t0, 0.010);
+    nasalGain.gain.setTargetAtTime(Math.max(0.0001, seg.velum_open * 0.90), t0, 0.015);
+  }
+
+  const endAt = now + totalDur + 0.05;
+  masterGain.gain.setTargetAtTime(0.0001, endAt - 0.04, 0.015);
+
+  oscMain.start(now);
+  oscSub.start(now);
+  noiseSrc.start(now);
+  oscMain.stop(endAt);
+  oscSub.stop(endAt);
+  noiseSrc.stop(endAt);
+
+  activeSynthNodes = { oscMain, oscSub, noiseSrc, masterGain, octaveMult };
+  activeVisemes = timeline;
+  synthStartTimeCtx = now;
+  synthEndTimeCtx = endAt;
+  playMode = "synth";
+
+  const statusEl = document.getElementById("hudStatus");
+  statusEl.textContent = "FORMANT SENTEZ";
+  statusEl.style.color = "#f59e0b";
+}
+
+// ============================================================================
+// MOTOR 2: NÖRAL AI SES ÜRETİCİ (EDGE-TTS API)
+// ============================================================================
+async function speakWithNeuralAI(gunesText, voiceId) {
   stopSpeech("AI SES ÜRETİLİYOR...");
   const statusEl = document.getElementById("hudStatus");
   statusEl.style.color = "#38bdf8";
 
-  const voiceId = document.getElementById("voiceSelect").value;
   try {
     const res = await fetch("/api/v1/tts", {
       method: "POST",
@@ -498,8 +764,8 @@ async function speakWithNeuralAI(gunesText) {
     analyser.connect(audioCtx.destination);
 
     currentAudioEl = audio;
-    isPlaying = true;
-    statusEl.textContent = "KONUŞUYOR";
+    playMode = "ai";
+    statusEl.textContent = "AI KONUŞUYOR";
     statusEl.style.color = "#f59e0b";
 
     audio.onended = () => stopSpeech("TAMAMLANDI");
@@ -507,12 +773,22 @@ async function speakWithNeuralAI(gunesText) {
     await audio.play();
   } catch (err) {
     console.error(err);
-    stopSpeech("BAĞLANTI HATASI");
+    stopSpeech("AI BAĞLANTI HATASI");
+  }
+}
+
+async function speakText(gunesText, metaItems = []) {
+  if (!gunesText || !gunesText.trim()) return;
+  const voiceId = document.getElementById("voiceSelect").value;
+  if (voiceId.startsWith("synth_")) {
+    await speakWithCustomFormantSynth(gunesText, metaItems, voiceId);
+  } else {
+    await speakWithNeuralAI(gunesText, voiceId);
   }
 }
 
 function updateLipSyncFromAudio() {
-  if (!isPlaying || !currentAudioEl || !analyser) return;
+  if (playMode === "none" || !analyser) return;
 
   const timeDomain = new Uint8Array(analyser.fftSize);
   analyser.getByteTimeDomainData(timeDomain);
@@ -523,7 +799,17 @@ function updateLipSyncFromAudio() {
   }
   const rms = Math.min(1.0, Math.sqrt(sumSq / timeDomain.length) * 4.2);
 
-  const t = currentAudioEl.currentTime;
+  let t = 0;
+  if (playMode === "ai" && currentAudioEl) {
+    t = currentAudioEl.currentTime;
+  } else if (playMode === "synth" && audioCtx) {
+    if (audioCtx.currentTime >= synthEndTimeCtx) {
+      stopSpeech("TAMAMLANDI");
+      return;
+    }
+    t = Math.max(0, audioCtx.currentTime - synthStartTimeCtx);
+  }
+
   let target = null;
   for (let i = 0; i < activeVisemes.length; i++) {
     if (t >= activeVisemes[i].start_s && t <= activeVisemes[i].end_s) {
@@ -536,15 +822,21 @@ function updateLipSyncFromAudio() {
     state.token = target.token;
     state.phoneme = target.phoneme;
     state.koma_node = target.koma_node;
-    state.pitch_hz = target.pitch_hz;
+    state.pitch_hz = Math.round(state.base_f0 * Math.pow(2.0, target.koma_node / 53.0) * 10) / 10;
 
-    const energyGain = 0.35 + rms * 0.85;
-    state.jaw_open += ((target.jaw_open * energyGain) - state.jaw_open) * 0.32;
-    state.tongue_x += (target.tongue_x - state.tongue_x) * 0.30;
-    state.tongue_y += (target.tongue_y - state.tongue_y) * 0.30;
-    state.lip_open += ((target.lip_open * energyGain) - state.lip_open) * 0.32;
-    state.lip_round += (target.lip_round - state.lip_round) * 0.30;
-    state.velum_open += (target.velum_open - state.velum_open) * 0.30;
+    if (target.f1) {
+      state.f1 = target.f1;
+      state.f2 = target.f2;
+      state.f3 = target.f3;
+    }
+
+    const energyGain = playMode === "synth" ? 0.95 : (0.35 + rms * 0.85);
+    state.jaw_open += ((target.jaw_open * energyGain) - state.jaw_open) * 0.34;
+    state.tongue_x += (target.tongue_x - state.tongue_x) * 0.32;
+    state.tongue_y += (target.tongue_y - state.tongue_y) * 0.32;
+    state.lip_open += ((target.lip_open * energyGain) - state.lip_open) * 0.34;
+    state.lip_round += (target.lip_round - state.lip_round) * 0.32;
+    state.velum_open += (target.velum_open - state.velum_open) * 0.32;
   } else {
     state.jaw_open += ((0.22 + rms * 0.75) - state.jaw_open) * 0.25;
     state.lip_open += ((0.18 + rms * 0.85) - state.lip_open) * 0.25;
@@ -558,9 +850,9 @@ async function checkApiHealth() {
   try {
     const res = await fetch("/api/v1/health");
     const data = await res.json();
-    document.getElementById("apiSourceBadge").textContent = `NEURAL TTS • ${data.suffixes_count} Z₅₃ EK`;
+    document.getElementById("apiSourceBadge").textContent = `53-KOMA SYNTH + AI • ${data.suffixes_count} EK`;
   } catch (_) {
-    document.getElementById("apiSourceBadge").textContent = "API ÇEVRİMDIŞI";
+    document.getElementById("apiSourceBadge").textContent = "53-KOMA YEREL SYNTH AKTİF";
   }
 }
 
@@ -572,19 +864,21 @@ async function runTranslation(andSpeak = false) {
     body: JSON.stringify({ text })
   });
   const data = await res.json();
+  lastTranslatedItems = data.items || [];
 
   document.getElementById("gunesOutput").textContent = data.gunes_text;
   document.getElementById("trMeta").textContent = `${data.word_count} kelime • ${data.elapsed_ms} ms`;
 
   const list = document.getElementById("morphList");
   list.innerHTML = "";
-  for (const item of data.items) {
+  for (const item of lastTranslatedItems) {
     const div = document.createElement("div");
     div.className = "morph-item";
     const sufHtml = item.suffixes.join("");
     const badgesHtml = [
       item.root_gunes ? `<span class="badge root-b">Kök: ${item.root_gunes}</span>` : "",
-      ...item.suffix_details.map(s => `<span class="badge">${s.code}: ${s.role}</span>`)
+      ...item.suffix_details.map(s => `<span class="badge">${s.code}: ${s.role}</span>`),
+      `<span class="badge">Z₅₃:${item.koma_slot}</span>`
     ].join("");
 
     div.innerHTML = `
@@ -598,7 +892,7 @@ async function runTranslation(andSpeak = false) {
   }
 
   if (andSpeak && data.gunes_text) {
-    await speakWithNeuralAI(data.gunes_text);
+    await speakText(data.gunes_text, lastTranslatedItems);
   }
 }
 
@@ -610,10 +904,11 @@ async function runDecode(andSpeak = false) {
     body: JSON.stringify({ text })
   });
   const data = await res.json();
+  lastDecodedResults = data.results || [];
 
   const list = document.getElementById("decodeList");
   list.innerHTML = "";
-  for (const r of data.results) {
+  for (const r of lastDecodedResults) {
     const div = document.createElement("div");
     div.className = "morph-item";
     const slotBadges = r.slots.map(s => `<span class="badge">${s.code} → ${s.role}</span>`).join("");
@@ -631,7 +926,10 @@ async function runDecode(andSpeak = false) {
   }
 
   if (andSpeak && text.trim()) {
-    await speakWithNeuralAI(text);
+    const meta = lastDecodedResults.map(r => ({
+      koma_slot: r.slots && r.slots.length ? r.slots[r.slots.length - 1].koma : 0
+    }));
+    await speakText(text, meta);
   }
 }
 
@@ -665,7 +963,7 @@ async function sendChatMessage() {
   log.appendChild(botDiv);
   log.scrollTop = log.scrollHeight;
 
-  await speakWithNeuralAI(data.gunes_text);
+  await speakText(data.gunes_text, data.items || []);
 }
 
 function switchTab(activeTabId, activePaneId) {
@@ -676,6 +974,13 @@ function switchTab(activeTabId, activePaneId) {
     document.getElementById(id).style.display = id === activePaneId ? "flex" : "none";
   });
 }
+
+document.getElementById("voiceSelect").addEventListener("change", (e) => {
+  const isSynth = e.target.value.startsWith("synth_");
+  document.getElementById("engineModeLabel").textContent = isSynth
+    ? "53-Koma Formant Synth"
+    : "Neural AI Lip-Sync";
+});
 
 document.getElementById("tabTrToGunes").addEventListener("click", () => switchTab("tabTrToGunes", "paneTrToGunes"));
 document.getElementById("tabGunesToTr").addEventListener("click", () => {
@@ -712,6 +1017,8 @@ function updateHUD() {
   document.getElementById("hudToken").textContent = `HECE: ${state.token}`;
   document.getElementById("hudKoma").textContent = `${state.koma_node} / 53`;
   document.getElementById("hudEnergy").textContent = `${Math.round(state.glottis_voicing * 100)}%`;
+  document.getElementById("hudFormants").textContent =
+    `F₀: ${state.pitch_hz.toFixed(1)}Hz • F₁: ${Math.round(state.f1)} • F₂: ${Math.round(state.f2)} • F₃: ${Math.round(state.f3)}`;
 
   document.getElementById("slJaw").value = state.jaw_open;
   document.getElementById("valJaw").textContent = state.jaw_open.toFixed(2);
@@ -727,6 +1034,8 @@ function updateHUD() {
   document.getElementById("valVel").textContent = state.velum_open.toFixed(2);
   document.getElementById("slGlo").value = state.glottis_voicing;
   document.getElementById("valGlo").textContent = state.glottis_voicing.toFixed(2);
+  document.getElementById("slF0").value = state.base_f0;
+  document.getElementById("valF0").textContent = state.base_f0.toFixed(1);
 }
 
 const sliderMap = [
@@ -738,8 +1047,22 @@ sliderMap.forEach(([id, key]) => {
   document.getElementById(id).addEventListener("input", (e) => {
     state[key] = parseFloat(e.target.value);
     state.token = "MANUEL_3D_POSE";
+    state.f1 = Math.round(260 + state.jaw_open * 360 - state.tongue_y * 120);
+    state.f2 = Math.round(750 + state.tongue_x * 1650 - state.lip_round * 420);
+    state.f3 = Math.round(2200 + state.tongue_x * 650 - state.lip_round * 250);
     updateHUD();
   });
+});
+
+document.getElementById("slF0").addEventListener("input", (e) => {
+  state.base_f0 = parseFloat(e.target.value);
+  state.pitch_hz = Math.round(state.base_f0 * Math.pow(2.0, state.koma_node / 53.0) * 10) / 10;
+  if (playMode === "synth" && activeSynthNodes && audioCtx) {
+    const f0 = state.pitch_hz * activeSynthNodes.octaveMult;
+    activeSynthNodes.oscMain.frequency.setTargetAtTime(f0, audioCtx.currentTime, 0.02);
+    activeSynthNodes.oscSub.frequency.setTargetAtTime(f0 * 0.5, audioCtx.currentTime, 0.02);
+  }
+  updateHUD();
 });
 
 const container = document.getElementById("threeContainer");
