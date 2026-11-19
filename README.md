@@ -265,11 +265,21 @@ AG Articulator is developed as an independent interface and experimental modelin
 
 ## 10. License & Intellectual Property
 
-AG Articulator's source-code license and distribution terms should be specified by the project owner.
-
-The underlying Güneş Dili linguistic engine has its own licensing and intellectual property framework.
-
-Use of the underlying engine, research materials and third-party components remains subject to their respective licensing terms.
+A☀️ GÜNEŞ DİLİ EKOSİSTEMİ
+•
+Morfoloji Motoru: Volkan Dağlı & WERR Collaborative Research Group (BSL 1.1)
+•
+İthaf: github.com/pCwOrM
+•
+TÜRKPATENT TR 2026/016285 & TR 2026/016633
+[ KÜNYE ▲ ]
+“Türk dili dillerin en zenginlerindendir; yeter ki bu dil şuurla işlensin.” — Gazi Mustafa Kemal Atatürk, 1935
+☀️ GÜNEŞ DİLİ EKOSİSTEMİ & ÇEKİRDEK MOTOR
+Güneş Dili Morfoloji Motoru: Volkan Dağlı & WERR Collaborative Research Group • Çekirdek Repo: pCwOrM/gunes-dili (BSL 1.1) • pCwOrM ithafıyla.
+⚖️ LİSANS & FİKRİ MÜLKİYET KORUMASI
+Business Source License 1.1 (BSL 1.1) • Açık Bilim & Akademik Araştırma Serbestisi (CC-BY-4.0) • ITouch Systems Koruması • TÜRKPATENT TR 2026/016285 & TR 2026/016633
+🏛️ BİLİMSEL MİRAS & TELİF
+Gazi Mustafa Kemal Atatürk (1935) & Sir Isaac Newton (1664) Bilimsel Mirası • © 2026 Güneş Dili Araştırma İnisiyatifi. Tüm bilimsel, matematiksel ve manevi hakları saklıdır.
 
 ---
 
