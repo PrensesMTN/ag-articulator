@@ -79,11 +79,15 @@ window.AgApp = (() => {
     let gunesText = document.getElementById("gunesOutput").textContent.trim();
 
     try {
+      const ctrl = new AbortController();
+      const tid = setTimeout(() => ctrl.abort(), 3500);
       const res = await fetch("/api/v1/translate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text })
+        body: JSON.stringify({ text }),
+        signal: ctrl.signal
       });
+      clearTimeout(tid);
       if (res.ok) {
         const data = await res.json();
         lastTranslatedItems = data.items || [];
