@@ -6,7 +6,7 @@
   <title>AG ARTİKÜLATÖR // Morphology & 3D Acoustics by Design</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-  <link rel="stylesheet" href="/static/styles.css?v=9" />
+  <link rel="stylesheet" href="/static/styles.css?v=10" />
 </head>
 <body>
 
@@ -16,28 +16,28 @@
 
   <svg id="cadOverlay">
     <polyline id="pinPalateLine" class="cad-stroke" points="0,0 0,0 0,0" />
-    <circle id="pinPalateDot" class="cad-dot" cx="0" cy="0" r="3" />
+    <circle id="pinPalateDot" class="cad-dot" cx="0" cy="0" r="3.5" />
     <g id="pinPalateBox" transform="translate(0,0)">
       <text class="cad-label" x="-6" y="-5" text-anchor="end">HARD PALATE // VELUM</text>
       <text class="cad-sub" x="-6" y="8" text-anchor="end">NASAL RESONANCE GATE</text>
     </g>
 
     <polyline id="pinLipLine" class="cad-stroke" points="0,0 0,0 0,0" />
-    <circle id="pinLipDot" class="cad-dot" cx="0" cy="0" r="3" />
+    <circle id="pinLipDot" class="cad-dot" cx="0" cy="0" r="3.5" />
     <g id="pinLipBox" transform="translate(0,0)">
       <text class="cad-label" x="6" y="-5">LABIAL APERTURE</text>
       <text id="cadLipVal" class="cad-sub" x="6" y="8">OPEN:0.20</text>
     </g>
 
     <polyline id="pinTongueLine" class="cad-stroke" points="0,0 0,0 0,0" />
-    <circle id="pinTongueDot" class="cad-dot" cx="0" cy="0" r="3" />
+    <circle id="pinTongueDot" class="cad-dot" cx="0" cy="0" r="3.5" />
     <g id="pinTongueBox" transform="translate(0,0)">
       <text class="cad-label" x="6" y="-5">LINGUAL FORMANT VECTOR</text>
       <text id="cadTongueVal" class="cad-sub" x="6" y="8">X:0.48 Y:0.32</text>
     </g>
 
     <polyline id="pinGlottisLine" class="cad-stroke" points="0,0 0,0 0,0" />
-    <circle id="pinGlottisDot" class="cad-dot" cx="0" cy="0" r="3" />
+    <circle id="pinGlottisDot" class="cad-dot" cx="0" cy="0" r="3.5" />
     <g id="pinGlottisBox" transform="translate(0,0)">
       <text class="cad-label" x="-6" y="-5" text-anchor="end">GLOTTIS SOURCE // Z₅₃</text>
       <text id="cadGlottisVal" class="cad-sub" x="-6" y="8" text-anchor="end">130.8 Hz</text>
@@ -80,7 +80,7 @@
           <strong>AG</strong> (GÜNEŞ / KÖK) + <strong>KÜ</strong> (KANONİK EK)<br/>
           <span>→ 53 HOLDER KOMASI HARMONİK SENTEZİ</span>
         </div>
-        <span>[v9.0]</span>
+        <span class="ver-tag">v10</span>
       </div>
     </div>
 
@@ -159,11 +159,17 @@
     <div class="dossier-card">
       <div class="dossier-bar">
         <span>Z₅₃ HARMONIC &amp; FORMANT INDEX</span>
-        <span>LIVE</span>
+        <span class="status-pill">LIVE</span>
       </div>
       <div class="solo-stats-grid">
         <div class="ring-wrap">
           <svg viewBox="0 0 84 84">
+            <defs>
+              <linearGradient id="purpleYellowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#a855f7" />
+                <stop offset="100%" stop-color="#facc15" />
+              </linearGradient>
+            </defs>
             <circle class="ring-bg" cx="42" cy="42" r="36"></circle>
             <circle id="komaRingFg" class="ring-fg" cx="42" cy="42" r="36"></circle>
           </svg>
@@ -233,8 +239,8 @@
     </div>
   </div>
 
-  <script src="/static/synth.js?v=9"></script>
-  <script src="/static/head3d.js?v=9"></script>
-  <script src="/static/app.js?v=9"></script>
+  <script src="/static/synth.js?v=10"></script>
+  <script src="/static/head3d.js?v=10"></script>
+  <script src="/static/app.js?v=10"></script>
 </body>
 </html>
