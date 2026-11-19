@@ -2,7 +2,7 @@
 ### Morphology, Phonetics & 3D Articulatory Modeling Platform
 
 <p align="center">
-  <img src="assets/logo.png" alt="AG Articulator Logo" width="240"/>
+  <img src="logo.png" alt="AG Articulator Logo" width="240"/>
 </p>
 
 <p align="center">
